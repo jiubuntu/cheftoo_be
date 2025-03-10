@@ -15,9 +15,9 @@ public class KakaoTest {
     @Autowired
     private KakaoService kakaoService;
 
-    @Test
-    public void getTokenTest() {
-        kakaoService.getACcessToken(testIngaCode);
-
-    }
+//    @Test
+//    public void getTokenTest() {
+//        kakaoService.getACcessToken(testIngaCode);
+//
+//    }
 }

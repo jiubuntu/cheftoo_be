@@ -4,6 +4,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -41,5 +43,16 @@ public class JwtUtil {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+
+    // JWT를 HttpOnly 쿠키로 저장하여 클라이언트로 전송
+    public void addJwtToCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+//        cookie.setSecure(true); // https에서만 전송
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (expirationTime / 3600000)); // 쿠키만료시간 설정
+        response.addCookie(cookie); // 클라이언트에 쿠키 저장
     }
 }
