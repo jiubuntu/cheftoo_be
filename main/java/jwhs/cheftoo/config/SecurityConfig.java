@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login").permitAll()
+                    .requestMatchers("/oauth/kakao/callback").permitAll()
                     .requestMatchers("/mypage").authenticated()
                     .anyRequest().permitAll()
                 )
