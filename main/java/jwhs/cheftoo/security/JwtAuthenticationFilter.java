@@ -23,7 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
 
-        if (requestURI.equals("/oauth/kakao/callback")) {
+        if (requestURI.equals("/oauth/kakao/callback")) { // 로그인 및 회원가입 요청은 JWT 검증 X
             filterChain.doFilter(request, response);
             return ;
         }

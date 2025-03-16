@@ -18,6 +18,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,17 +33,27 @@ public class KakaoService {
     private final JwtUtil jwtUtil;
 
     // 카카오 로그인 처리
-    public String loginWithKakao(String code) {
+    public Map<String, Object> loginWithKakao(String code) {
         String accessToken = kakaoUtil.getACcessToken(code);
         Kakao.KakaoUserInfo kakaoUserInfo = kakaoUtil.getUserInfo(accessToken);
         String kakaoUserId = String.valueOf(kakaoUserInfo.getId());
 
         // 카카오 회원 ID로 조회된 회원이 없으면 회원가입, 있으면 memberId 반환
-        Member member = memberRepository.findByKakaoId(kakaoUserId)
-                .orElseGet(() -> registerNewUser(kakaoUserId));
+//        Member member = memberRepository.findByKakaoId(kakaoUserId)
+//                .orElseGet(() -> registerNewUser(kakaoUserId));
+        Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoUserId);
 
-        return jwtUtil.generateToken(String.valueOf(member.getMemberId()));
+        boolean isNewUser = optionalMember.isEmpty(); // 처음 가입한 사용자인지
+
+        Member member = optionalMember.orElseGet(() -> registerNewUser(kakaoUserId));
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("isNewUser", isNewUser);
+        resultMap.put("jwt", jwtUtil.generateToken(String.valueOf(member.getMemberId())));
+
+        return resultMap;
     }
+
 
     // 회원가입처리
     private Member registerNewUser(String kakaoUserId) {
