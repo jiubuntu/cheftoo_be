@@ -1,8 +1,7 @@
 package jwhs.cheftoo.oauth.kakao;
 
 
-import jwhs.cheftoo.service.KakaoService;
-import org.junit.jupiter.api.Test;
+import jwhs.cheftoo.auth.service.KakaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;

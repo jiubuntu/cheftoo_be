@@ -2,7 +2,7 @@ package jwhs.cheftoo.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jwhs.cheftoo.dto.Kakao;
+import jwhs.cheftoo.auth.dto.Kakao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

@@ -1,4 +1,4 @@
-package jwhs.cheftoo.controller;
+package jwhs.cheftoo.recipe;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

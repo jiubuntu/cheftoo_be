@@ -1,7 +1,7 @@
-package jwhs.cheftoo.controller;
+package jwhs.cheftoo.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jwhs.cheftoo.service.KakaoService;
+import jwhs.cheftoo.auth.service.KakaoService;
 import jwhs.cheftoo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

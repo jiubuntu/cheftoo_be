@@ -1,4 +1,4 @@
-package jwhs.cheftoo.dto;
+package jwhs.cheftoo.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

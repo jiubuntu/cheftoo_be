@@ -1,22 +1,13 @@
-package jwhs.cheftoo.service;
+package jwhs.cheftoo.auth.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jwhs.cheftoo.dto.Kakao;
+import jwhs.cheftoo.auth.dto.Kakao;
 import jwhs.cheftoo.entity.Member;
 import jwhs.cheftoo.repository.MemberRepository;
 import jwhs.cheftoo.util.JwtUtil;
 import jwhs.cheftoo.util.KakaoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
 import java.util.Map;

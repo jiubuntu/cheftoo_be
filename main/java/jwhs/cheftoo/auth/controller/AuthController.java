@@ -1,4 +1,4 @@
-package jwhs.cheftoo.controller;
+package jwhs.cheftoo.auth.controller;
 
 
 import jwhs.cheftoo.util.JwtUtil;
