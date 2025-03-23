@@ -1,8 +1,8 @@
 package jwhs.cheftoo.auth.service;
 
 import jwhs.cheftoo.auth.dto.Kakao;
-import jwhs.cheftoo.entity.Member;
-import jwhs.cheftoo.repository.MemberRepository;
+import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.repository.MemberRepository;
 import jwhs.cheftoo.util.JwtUtil;
 import jwhs.cheftoo.util.KakaoUtil;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class KakaoService {
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("isNewUser", isNewUser);
-        resultMap.put("jwt", jwtUtil.generateToken(String.valueOf(member.getMemberId())));
+        resultMap.put("jwt", jwtUtil.generateToken(member.getMemberId()));
 
         return resultMap;
     }

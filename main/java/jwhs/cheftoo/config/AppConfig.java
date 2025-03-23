@@ -1,5 +1,4 @@
 package jwhs.cheftoo.config;
-import jwhs.cheftoo.repository.MemberRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.context.annotation.Bean;

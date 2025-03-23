@@ -1,5 +1,6 @@
 package jwhs.cheftoo.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -10,15 +11,16 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtUtil {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 시크릿 키 생성
     private final long expirationTime = 3600000; // 1시간
 
-    public String generateToken(String MemberId) {
+    public String generateToken(UUID memberId) {
         return Jwts.builder()
-                .setSubject(MemberId)
+                .setSubject(memberId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
@@ -55,4 +57,16 @@ public class JwtUtil {
         cookie.setMaxAge((int) (expirationTime / 1000)); // 쿠키만료시간 설정
         response.addCookie(cookie); // 클라이언트에 쿠키 저장
     }
+
+    // JWT로부터 MemberId 추출
+    public String getMemberIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
 }

@@ -1,6 +1,6 @@
-package jwhs.cheftoo.repository;
+package jwhs.cheftoo.recipe.repository;
 
-import jwhs.cheftoo.entity.Recipe;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package jwhs.cheftoo.entity;
+package jwhs.cheftoo.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

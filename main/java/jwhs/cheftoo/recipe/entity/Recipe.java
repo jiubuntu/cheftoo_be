@@ -1,7 +1,8 @@
-package jwhs.cheftoo.entity;
+package jwhs.cheftoo.recipe.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Recipe {
 
     @Id
@@ -26,17 +28,11 @@ public class Recipe {
     @Column(name="memberId")
     private UUID memberId;
 
-    @Column(name="FolderId")
-    private UUID folderId;
-
     @Column(name="RecipeTitle", length=100)
     private String recipeTitle;
 
     @Column(name="RecipeContent", columnDefinition = "TEXT")
     private String recipeContent;
-
-    @Column(name="RecipeStarScope")
-    private float recipeStarScope;
 
     @Column(name="DataCreated")
     private String dataCreated;
