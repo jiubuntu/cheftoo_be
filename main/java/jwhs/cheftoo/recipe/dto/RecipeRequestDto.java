@@ -14,13 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeRequestDto {
-
-    private UUID memberId;
     private String recipeTitle;
     private String recipeContent;
     private List<String> ingredients; // 재료
-    private List<String> cookingSteps; // 요리 순서
-    private List<String> imgPaths; // 이미지 경로
-
-
+    private List<CookingStepsDto> cookingSteps; // 요리 순서
 }
