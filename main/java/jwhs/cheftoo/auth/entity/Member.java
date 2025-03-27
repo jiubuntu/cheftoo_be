@@ -36,9 +36,9 @@ public class Member {
     private LocalDateTime lastLogin;
 
     @Column(name = "DataCreated")
-    private String dataCreated;
+    private LocalDateTime dataCreated;
 
     @Column(name = "DataUpdated")
-    private String dataUpdated;
+    private LocalDateTime dataUpdated;
 
 }

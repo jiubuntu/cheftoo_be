@@ -1,43 +1,42 @@
 package jwhs.cheftoo.recipe.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// 레시피
+// 조리순서
 @Entity
-@Table(name="Recipe")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Recipe {
+@Table(name = "CookingOrder")
+public class CookingOrder {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name="RecipeId",updatable = false, nullable = false)
+    @Column(name = "RecipeId")
     private UUID recipeId;
 
-    @Column(name="memberId")
-    private UUID memberId;
+    @Column(name = "order")
+    private long order;
 
-    @Column(name="RecipeTitle", length=100)
-    private String recipeTitle;
+    @Column(name = "content")
+    private String content;
 
-    @Column(name="RecipeContent", columnDefinition = "TEXT")
-    private String recipeContent;
+    @Column(name = "imgPath", length = 255)
+    private String imgPath;
 
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;
 
     @Column(name="DataUpdated")
     private LocalDateTime dataUpdated;
+
 }

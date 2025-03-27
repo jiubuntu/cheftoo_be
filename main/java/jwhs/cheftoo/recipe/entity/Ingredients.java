@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -29,9 +30,9 @@ public class Ingredients {
     private String ingredientsName;
 
     @Column(name="DataCreated")
-    private String dataCreated;
+    private LocalDateTime dataCreated;
 
     @Column(name="DataUpdated")
-    private String dataUpdated;
+    private LocalDateTime dataUpdated;
 
 }
