@@ -7,6 +7,7 @@ import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,10 @@ public class RecipeController {
         String token = jwtUtil.getTokenFromRequest(request);
         String memberId = jwtUtil.getMemberIdFromToken(token);
 
+        // 레시피 저장
         UUID recipeId = recipeService.createRecipe(dto, memberId, imageFile, stepImages);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeId);
 
 
     }
