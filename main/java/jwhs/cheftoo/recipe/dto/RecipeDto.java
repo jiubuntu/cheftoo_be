@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -17,8 +18,8 @@ public class RecipeDto {
     private UUID memberId;
     private String recipeTitle;
     private String recipeContent;
-    private String dataCreated;
-    private String dataUpdated;
+    private LocalDateTime dataCreated;
+    private LocalDateTime dataUpdated;
 
 
     // Entity를 Dto로 변환

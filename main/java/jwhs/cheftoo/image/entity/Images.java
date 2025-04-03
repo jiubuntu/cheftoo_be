@@ -1,4 +1,4 @@
-package jwhs.cheftoo.image;
+package jwhs.cheftoo.image.entity;
 
 
 import jakarta.persistence.*;
