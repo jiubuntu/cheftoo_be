@@ -19,8 +19,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateNickname(String memberId, String nickname) {
-        Member member = memberRepository.findById(UUID.fromString(memberId))
+    public void updateNickname(UUID memberId, String nickname) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("해당 유저가 존재하지 않습니다."));
         member.setNickname(nickname);
     }

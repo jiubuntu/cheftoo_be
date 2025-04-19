@@ -2,6 +2,7 @@ package jwhs.cheftoo.image.service;
 
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.image.entity.Images;
+import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -24,6 +25,11 @@ public class ImageService {
 
     public ImageService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
+    }
+
+    public Images findMainImageByRecipeId(UUID recipeId) {
+        return imageRepository.findMainImageByRecipeId(recipeId)
+                .orElseThrow(() -> new MainImageNotFoundException("레시피의 대표 이미지를 찾을 수 없습니다."));
     }
 
     private String getImageHash(MultipartFile file) throws IOException {
@@ -86,7 +92,7 @@ public class ImageService {
      * @throws IOException
      */
     public UUID updateMainImage(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
-        Images image = imageRepository.findFirstByRecipeId(recipeId)
+        Images image = imageRepository.findMainImageByRecipeId(recipeId)
                 .orElse(null);
         String existingImagePath = image.getImgPath();
 

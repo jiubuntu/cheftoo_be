@@ -36,4 +36,6 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND) // or BAD_REQUEST
                 .body(error);
     }
+
+
 }

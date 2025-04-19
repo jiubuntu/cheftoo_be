@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class AuthController {
             HttpServletRequest request
     ) {
        String token = jwtUtil.getTokenFromRequest(request);
-       String memberId = jwtUtil.getMemberIdFromToken(token);
+       UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
        memberService.updateNickname(memberId, nickname);
 

@@ -21,7 +21,10 @@ public class CookingOrder {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "RecipeId")
+    @Column(name = "CookingOrderId")
+    private UUID cookingOrderId;
+
+    @Column(name = "recipeId")
     private UUID recipeId;
 
     @Column(name = "order")

@@ -12,6 +12,8 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+
+// 다건조회
 public class RecipeDto {
 
     private UUID recipeId;
@@ -35,6 +37,6 @@ public class RecipeDto {
 
         );
     }
-
-
 }
+
+

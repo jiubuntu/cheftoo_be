@@ -62,7 +62,7 @@ public class RecipeController {
     ) {
         // JWT의 Payload에서 memberId 추출
         String token = jwtUtil.getTokenFromRequest(request);
-        String memberId = jwtUtil.getMemberIdFromToken(token);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
         UUID savedRecipeId = null;
 
         if (recipeId == null) { // INSESRT

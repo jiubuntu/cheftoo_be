@@ -59,14 +59,14 @@ public class JwtUtil {
     }
 
     // JWT로부터 MemberId 추출
-    public String getMemberIdFromToken(String token) {
+    public UUID getMemberIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getSubject();
+        return UUID.fromString(claims.getSubject());
     }
 
 }

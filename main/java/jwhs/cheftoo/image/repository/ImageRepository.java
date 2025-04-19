@@ -12,11 +12,13 @@ import java.util.UUID;
 
 public interface ImageRepository extends JpaRepository<Images, UUID> {
 
-    Optional<Images> findFirstByRecipeId(UUID recipeId);
+    Optional<Images> findMainImageByRecipeId(UUID recipeId);
 
     @Modifying
     @Query("DELETE FROM Images i WHERE i.image_id :imageId")
     int deleteByImageId(@Param("imageId") UUID imageId);
+
+
 
 
 
