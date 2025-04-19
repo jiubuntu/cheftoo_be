@@ -135,6 +135,11 @@ public class ImageService {
 
     }
 
+    public void deleteByRecipeId(UUID recipeId) {
+        imageRepository.deleteByRecipeId(recipeId);
+
+    }
+
 
 
 

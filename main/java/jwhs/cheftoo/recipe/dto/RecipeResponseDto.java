@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 
 // 다건조회
-public class RecipeDto {
+public class RecipeResponseDto {
 
     private UUID recipeId;
     private UUID memberId;
@@ -25,8 +25,8 @@ public class RecipeDto {
 
 
     // Entity를 Dto로 변환
-    public static RecipeDto fromEntity(Recipe recipe) {
-        return new RecipeDto(
+    public static RecipeResponseDto fromEntity(Recipe recipe) {
+        return new RecipeResponseDto(
                 recipe.getRecipeId(),
                 recipe.getMemberId(),
                 recipe.getRecipeTitle(),

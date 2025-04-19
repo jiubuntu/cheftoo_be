@@ -1,4 +1,4 @@
-package jwhs.cheftoo.recipe.entity;
+package jwhs.cheftoo.cookingOrder.entity;
 
 
 import jakarta.persistence.*;

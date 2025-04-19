@@ -19,7 +19,7 @@ public interface ImageRepository extends JpaRepository<Images, UUID> {
     int deleteByImageId(@Param("imageId") UUID imageId);
 
 
-
+    void deleteByRecipeId(UUID recipeId);
 
 
 }

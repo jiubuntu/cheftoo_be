@@ -52,6 +52,19 @@ public class RecipeController {
         return handleRecipeSave(dto, imageFile, stepImages, request, recipeId);
     }
 
+    @DeleteMapping("/{recipeId}")
+    public ResponseEntity<?> deleteRecipe(
+            @RequestParam UUID recipeId
+    ) {
+        try {
+            recipeService.deleteRecipe(recipeId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.noContent().build();
+
+    }
+
 
     private ResponseEntity<?> handleRecipeSave(
             RecipeRequestDto dto,

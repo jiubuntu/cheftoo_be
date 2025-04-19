@@ -1,10 +1,7 @@
 package jwhs.cheftoo.recipe.dto;
-import jwhs.cheftoo.image.entity.Images;
-import jwhs.cheftoo.recipe.entity.CookingOrder;
 import lombok.*;
 
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,7 +63,7 @@ public class RecipeDetailResponseDto {
         private String content;
         private String imgPath;
 
-        public static List<CookingOrder> fromEntity(List<jwhs.cheftoo.recipe.entity.CookingOrder> cookingOrderEntitys) {
+        public static List<CookingOrder> fromEntity(List<jwhs.cheftoo.cookingOrder.entity.CookingOrder> cookingOrderEntitys) {
             return cookingOrderEntitys.stream()
                             .map(cookingOrderEntity -> {
                                 return CookingOrder.builder()

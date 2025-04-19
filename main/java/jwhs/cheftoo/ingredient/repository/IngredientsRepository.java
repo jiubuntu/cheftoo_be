@@ -10,4 +10,5 @@ public interface IngredientsRepository extends JpaRepository<Ingredients, UUID> 
 
     Optional<Ingredients> findByRecipeIdAndIngredientsName(UUID recipeId, String ingredientsName);
     Optional<Ingredients> findByRecipeId(UUID recipeId);
+    void deleteByRecipeId(UUID recipeId);
 }

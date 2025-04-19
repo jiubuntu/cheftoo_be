@@ -1,16 +1,16 @@
 package jwhs.cheftoo.recipe.service;
 
 import jakarta.transaction.Transactional;
-import jwhs.cheftoo.image.dto.ImagesResponseDto;
+import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
 import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
 import jwhs.cheftoo.recipe.entity.Recipe;
-import jwhs.cheftoo.recipe.dto.RecipeDto;
+import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
-import jwhs.cheftoo.recipe.repository.CookingOrderRepository;
+import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
@@ -68,11 +68,11 @@ public class RecipeService {
 
 
     // 전체조회
-    public List<RecipeDto> findAllRecipes() {
+    public List<RecipeResponseDto> findAllRecipes() {
         List<Recipe> recipeList = recipeRepository.findAll();
 
         return recipeList.stream()
-                .map(RecipeDto :: fromEntity)
+                .map(RecipeResponseDto:: fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -169,7 +169,7 @@ public class RecipeService {
 
                 // 저장 로직: content + image 조합
                 cookingOrderRepository.save(
-                        jwhs.cheftoo.recipe.entity.CookingOrder.builder()
+                        CookingOrder.builder()
                                 .recipeId(recipeId)
                                 .order(idx)
                                 .content(content)
@@ -180,6 +180,21 @@ public class RecipeService {
                 idx ++;
             }
         }
+    }
+
+    @Transactional
+    public void deleteRecipe(UUID recipeId) {
+        // 존재 여부 확인 (Optional 처리 생략 가능)
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new NoSuchElementException("레시피가 존재하지 않습니다."));
+
+        // 자식 엔티티 먼저 삭제
+        cookingOrderRepository.deleteByRecipeId(recipeId);
+        ingredientsRepository.deleteByRecipeId(recipeId);
+        imageService.deleteByRecipeId(recipeId);
+
+        // 마지막에 부모 엔티티 삭제
+        recipeRepository.delete(recipe);
     }
 
 
