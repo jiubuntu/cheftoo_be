@@ -1,5 +1,6 @@
 package jwhs.cheftoo.image.repository;
 
+import jakarta.transaction.Transactional;
 import jwhs.cheftoo.image.entity.Images;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,7 +16,7 @@ public interface ImageRepository extends JpaRepository<Images, UUID> {
     Optional<Images> findMainImageByRecipeId(UUID recipeId);
 
     @Modifying
-    @Query("DELETE FROM Images i WHERE i.image_id :imageId")
+    @Query("DELETE FROM Images i WHERE i.imageId = :imageId")
     int deleteByImageId(@Param("imageId") UUID imageId);
 
 

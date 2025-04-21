@@ -30,6 +30,10 @@ public class Ingredients {
     @Column(name = "ingredientsName" , length = 100)
     private String ingredientsName;
 
+    @Column(name ="ingredientsNum", length = 10)
+    private String ingredientsNum;
+
+
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;
 

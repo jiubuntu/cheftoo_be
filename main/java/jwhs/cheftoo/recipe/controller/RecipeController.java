@@ -30,6 +30,16 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
+    @GetMapping("/{recipeId}")
+    public ResponseEntity<?> getRecipe(@RequestParam UUID recipeId) {
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<?> getAllRecipe(@RequestParam UUID recipeId) {
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes());
+    }
+
     @PostMapping("/")
     public ResponseEntity<?> createRecipe(
             @RequestPart("data") RecipeRequestDto dto,

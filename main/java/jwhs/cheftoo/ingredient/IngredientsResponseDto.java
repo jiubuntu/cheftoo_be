@@ -12,12 +12,14 @@ public class IngredientsResponseDto {
     private UUID ingredientsId;
     private UUID recipeId;
     private String ingredientsName;
+    private String ingredientsNum;
 
     public static IngredientsResponseDto fromEntity(Ingredients ingredients) {
         return IngredientsResponseDto.builder()
                 .ingredientsId(ingredients.getIngredientsId())
                 .recipeId(ingredients.getRecipeId())
                 .ingredientsName(ingredients.getIngredientsName())
+                .ingredientsNum(ingredients.getIngredientsNum())
                 .build();
     }
 }

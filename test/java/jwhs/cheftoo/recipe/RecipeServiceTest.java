@@ -145,7 +145,7 @@ public class RecipeServiceTest {
         assertEquals("test recipe2 content", result.get(1).getRecipeContent());
 
     }
-    
+
 
 
 }

@@ -44,12 +44,14 @@ public class RecipeDetailResponseDto {
         private UUID ingredientsId;
         private UUID recipeId;
         private String ingredientsName;
+        private String ingredientsNum;
 
         public static Ingredients fromEntity(jwhs.cheftoo.ingredient.entity.Ingredients ingredientsEntity) {
             return Ingredients.builder()
                     .ingredientsId(ingredientsEntity.getIngredientsId())
                     .recipeId(ingredientsEntity.getRecipeId())
                     .ingredientsName(ingredientsEntity.getIngredientsName())
+                    .ingredientsNum(ingredientsEntity.getIngredientsNum())
                     .build();
         }
     }

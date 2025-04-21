@@ -150,6 +150,7 @@ public class RecipeService {
                                 .ingredientsId(ingredient.getIngredientsId())
                                 .recipeId(recipeId)
                                 .ingredientsName(ingredient.getIngredientsName())
+                                .ingredientsNum(ingredient.getIngredientsNum())
                                 .build();
                     })
                     .collect(Collectors.toList());
