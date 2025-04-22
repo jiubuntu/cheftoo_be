@@ -42,7 +42,7 @@ public class OauthController {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String , String > parsed = objectMapper.readValue(decoded, new TypeReference<Map<String, String>>() {
                 });
-                prevPage = parsed.getOrDefault(prevPage, "/");
+                prevPage = parsed.getOrDefault("prevPage", "/");
                 nextPage = parsed.get("nextPage");
             } catch (Exception e) {
                 e.printStackTrace();
