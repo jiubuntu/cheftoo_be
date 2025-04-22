@@ -2,6 +2,7 @@ package jwhs.cheftoo.recipe;
 
 
 import jakarta.persistence.Column;
+import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
 import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
 import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
@@ -9,6 +10,7 @@ import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
+import jwhs.cheftoo.ingredient.dto.IngredientsDto;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.entity.Recipe;
@@ -19,6 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -27,7 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RecipeServiceTest {
@@ -143,6 +148,60 @@ public class RecipeServiceTest {
         assertEquals(memberId1, result.get(1).getMemberId());
         assertEquals("test recipe2 title", result.get(1).getRecipeTitle());
         assertEquals("test recipe2 content", result.get(1).getRecipeContent());
+
+    }
+
+    @Test
+    void 레시피생성_성공() throws IOException {
+        //given
+        UUID recipeId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        UUID mainImageId = UUID.randomUUID();
+
+        RecipeRequestDto recipeRequestDto = RecipeRequestDto.builder()
+                .recipeTitle("test recipe title")
+                .recipeContent("test recipe content")
+                .ingredients(List.of(IngredientsDto.builder()
+                                .ingredientsId(UUID.randomUUID())
+                                .recipeId(recipeId)
+                                .ingredientsName("test ingredients name")
+                                .ingredientsNum("test ingredients num")
+                                .build()))
+                .cookingOrders(List.of(CookingOrderDto.builder()
+                                .cookingOrderId(UUID.randomUUID())
+                                .recipeId(recipeId)
+                                .order(1)
+                                .content("test cookingOrders content")
+                                .imgPath("step1.jpg")
+                                .build()))
+                .build();
+
+        MultipartFile mainImage = mock(MultipartFile.class);
+        List<MultipartFile> step1Image = List.of(mock(MultipartFile.class));
+
+
+        when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> {
+            Recipe recipe = invocation.getArgument(0); // save 함수 첫번째 인자 가져옴
+            recipe.setRecipeId(recipeId);
+            return recipe;
+        });
+
+        when(imageService.updateMainImage(mainImage, memberId, recipeId)).thenReturn(mainImageId); // 대표이미지
+        when(imageService.saveCookingOrderImage(step1Image.get(0))).thenReturn("step1.jpg");
+
+        // when
+        UUID resultId = recipeService.createRecipe(recipeRequestDto, memberId, mainImage, step1Image);
+
+        //then
+        assertEquals(recipeId, resultId);
+        verify(recipeRepository).save(any(Recipe.class));
+        verify(imageService).updateMainImage(mainImage, memberId, recipeId);
+
+        verify(imageService).saveCookingOrderImage(step1Image.get(0));
+        verify(ingredientsRepository).saveAll(anyList());
+        verify(cookingOrderRepository).save(any(CookingOrder.class));
+
+
 
     }
 

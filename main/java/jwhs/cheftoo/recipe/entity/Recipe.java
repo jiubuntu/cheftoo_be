@@ -1,10 +1,7 @@
 package jwhs.cheftoo.recipe.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 
@@ -15,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name="Recipe")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
