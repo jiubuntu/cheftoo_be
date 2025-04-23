@@ -26,8 +26,9 @@ public class RecipeController {
     private RecipeService recipeService;
     private JwtUtil jwtUtil;
 
-    public RecipeController(RecipeService recipeService) {
+    public RecipeController(RecipeService recipeService, JwtUtil jwtUtil) {
         this.recipeService = recipeService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/{recipeId}")
