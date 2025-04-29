@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,12 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 public class ImageService {
+
+    @Value("${image.main-image.path}")
+    String mainImagePath;
+
+    @Value("${image.cookingorder-image.path}")
+    String cookingOrderImagePath;
 
     private ImageRepository imageRepository;
 
@@ -40,11 +47,26 @@ public class ImageService {
         return DigestUtils.sha256Hex(new FileInputStream(file));
     }
 
+
+    // 이미 이미지 폴더가 생성되어있는지 체크하는 함수
+    private void checkAndMakeDir(String dirPath) {
+        //dir 폴더 없으면 생성
+        File dir = new File(dirPath);
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+
+    // 대표 이미지 저장
     public UUID saveMainImage(MultipartFile file, UUID memberId, UUID recipeId) {
-        // 대표 이미지 저장
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String path = "/uploads/images/main_images/" + today + "/" + fileName;
+        String dirPath = mainImagePath + "/" + today + "/";
+        String path = dirPath + fileName;
+
+        checkAndMakeDir(dirPath);
+
         File dest = new File(path);
         try {
             file.transferTo(dest);
@@ -68,7 +90,11 @@ public class ImageService {
     public String saveCookingOrderImage(MultipartFile file)  {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String path = "/uploads/images/cooking_orders_images/" + today + "/" + fileName;
+        String dirPath = cookingOrderImagePath + "/" + today + "/";
+        String path = dirPath + fileName;
+
+        checkAndMakeDir(dirPath);
+
         File dest = new File(path);
 
         try {
@@ -94,16 +120,17 @@ public class ImageService {
     public UUID updateMainImage(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
         Images image = imageRepository.findMainImageByRecipeId(recipeId)
                 .orElse(null);
-        String existingImagePath = image.getImgPath();
 
         if (image == null ) { // 새로 저장
             return saveMainImage(file, memberId, recipeId);
         }
 
+        // 이미 저장된 이미지가 있다면 -> 저장된 이미지의 해시값과 비교
+        String existingImagePath = image.getImgPath();
         String existingImageHash = getImageHash(new File(existingImagePath));
-        String imageHash = getImageHash(file);
+        String uploadImageHash = getImageHash(file);
 
-        if (existingImageHash.equals(imageHash)) { // 기존 이미지와 동일하면 아무것도 안함
+        if (existingImageHash.equals(uploadImageHash)) { // 기존 이미지와 동일하면 아무것도 안함
             return image.getImageId();
         }
 

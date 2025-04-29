@@ -7,9 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.UUID;
 
 // JWT 유효성 검증 필터
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -45,6 +50,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.sendRedirect(KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code");
             return ;
         }
+
+        // 토큰이 유효하면 Authentication 객체 생성 후 세팅
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
 
         filterChain.doFilter(request, response);
 

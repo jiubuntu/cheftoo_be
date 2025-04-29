@@ -2,6 +2,7 @@ package jwhs.cheftoo.recipe.service;
 
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
+import jwhs.cheftoo.image.exception.ImageSaveException;
 import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
@@ -91,7 +92,7 @@ public class RecipeService {
             // 4. 조리순서 저장
             saveCookingOrders(recipeRequestDto, stepImages, recipeId);
             return recipeId;
-        } catch (RecipeCreateException | IOException e) {
+        } catch ( Exception e) {
             throw new RecipeCreateException("레시피 저장 중 에러 발생");
         }
 
@@ -112,7 +113,7 @@ public class RecipeService {
             saveIngredienets(recipeRequestDto, recipeId);
 
             // 4. 조리순서 저장
-            saveCookingOrders(recipeRequestDto, stepImages, recipeId);
+            updateCookingOrders(recipeRequestDto, stepImages, recipeId);
 
             return recipeId;
         } catch ( RecipeCreateException e) {
@@ -161,7 +162,36 @@ public class RecipeService {
 
     private void saveCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
         List<CookingOrderDto> steps = recipeRequestDto.getCookingOrders();
-        if (steps.size() > 0) {
+        if (!steps.isEmpty() && steps != null) {
+            int idx = 1;
+            for (int i = 0; i < steps.size(); i++) {
+                String imagePath = null ;
+                String content = steps.get(i).getContent();
+                MultipartFile image = stepImages.get(i);
+
+                try {
+                    imagePath = imageService.saveCookingOrderImage(image);
+                } catch (Exception e) {
+                    throw new ImageSaveException("이미지 저장 중 에러발생", e);
+                }
+
+                cookingOrderRepository.save(
+                        CookingOrder.builder()
+                                .recipeId(recipeId)
+                                .order(idx)
+                                .content(content)
+                                .imgPath(imagePath)
+                                .build()
+                );
+
+                idx ++;
+            }
+        }
+    }
+
+    private void updateCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
+        List<CookingOrderDto> steps = recipeRequestDto.getCookingOrders();
+        if (!steps.isEmpty() && steps != null ) {
             int idx = 1;
             for (int i = 0; i < steps.size(); i++) {
                 String content = steps.get(i).getContent();

@@ -41,7 +41,7 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes());
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> createRecipe(
             @RequestPart("data") RecipeRequestDto dto,
             @RequestPart("image") MultipartFile imageFile, // 대표 이미지
@@ -83,6 +83,7 @@ public class RecipeController {
             List<MultipartFile> stepImages,
             HttpServletRequest request,
             UUID recipeId
+
     ) {
         // JWT의 Payload에서 memberId 추출
         String token = jwtUtil.getTokenFromRequest(request);
