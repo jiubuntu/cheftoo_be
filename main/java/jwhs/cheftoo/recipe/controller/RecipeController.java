@@ -94,7 +94,7 @@ public class RecipeController {
             savedRecipeId = recipeService.createRecipe(dto, memberId, imageFile, stepImages);
         } else { // UPDATE
             try {
-                savedRecipeId = recipeService.updateRecipe(dto, memberId, imageFile, stepImages, recipeId);
+//                savedRecipeId = recipeService.updateRecipe(dto, memberId, imageFile, stepImages, recipeId);
             } catch (Exception e) {
                 e.printStackTrace();
             }

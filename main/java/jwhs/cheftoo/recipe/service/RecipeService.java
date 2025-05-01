@@ -14,8 +14,13 @@ import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 
 import java.io.IOException;
@@ -24,6 +29,8 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
+
 @Service
 public class RecipeService {
 
@@ -31,6 +38,11 @@ public class RecipeService {
     private IngredientsRepository ingredientsRepository;
     private CookingOrderRepository cookingOrderRepository;
     private ImageService imageService;
+
+
+
+
+
 
 
     public RecipeService(RecipeRepository recipeRepository, IngredientsRepository ingredientsRepository, CookingOrderRepository cookingOrderRepository, ImageService imageService) {
@@ -95,33 +107,31 @@ public class RecipeService {
         } catch ( Exception e) {
             throw new RecipeCreateException("레시피 저장 중 에러 발생");
         }
-
-
     }
 
 
-    @Transactional
-    public UUID updateRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages, UUID recipeId) throws  IOException{
-        try {
-            // 1. 레시피 저장
-            saveRecipe(recipeId, memberId, recipeRequestDto);
-
-            // 2. 대표 이미지 업데이트
-            saveMainImage(imageFile, memberId, recipeId);
-
-            // 3. 재료 저장
-            saveIngredienets(recipeRequestDto, recipeId);
-
-            // 4. 조리순서 저장
-            updateCookingOrders(recipeRequestDto, stepImages, recipeId);
-
-            return recipeId;
-        } catch ( RecipeCreateException e) {
-            throw new RecipeCreateException("레시피 UPDATE 중 에러 발생");
-        }
-
-
-    }
+//    @Transactional
+//    public UUID updateRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages, UUID recipeId) throws  IOException{
+//        try {
+//            // 1. 레시피 저장
+//            saveRecipe(recipeId, memberId, recipeRequestDto);
+//
+//            // 2. 대표 이미지 업데이트
+//            saveMainImage(imageFile, memberId, recipeId);
+//
+//            // 3. 재료 저장
+//            saveIngredienets(recipeRequestDto, recipeId);
+//
+////            // 4. 조리순서 저장
+////            updateCookingOrders(recipeRequestDto, stepImages, recipeId);
+//
+//            return recipeId;
+//        } catch ( RecipeCreateException e) {
+//            throw new RecipeCreateException("레시피 UPDATE 중 에러 발생");
+//        }
+//
+//
+//    }
 
     private UUID saveRecipe(UUID recipeId, UUID memberId, RecipeRequestDto recipeRequestDto) {
         Recipe recipe = Recipe.builder()
@@ -137,7 +147,8 @@ public class RecipeService {
 
     private UUID saveMainImage(MultipartFile imageFile, UUID memberId, UUID recipeId) throws IOException {
         if (imageFile != null && !imageFile.isEmpty()) {
-            return imageService.updateMainImage(imageFile, memberId, recipeId);
+//            return imageService.updateMainImage(imageFile, memberId, recipeId);
+            return imageService.saveMainImageMetaAndFile(imageFile, memberId, recipeId);
         } else {
             return null;
         }
@@ -148,7 +159,6 @@ public class RecipeService {
             List<Ingredients> ingredients = recipeRequestDto.getIngredients().stream()
                     .map(ingredient -> {
                         return Ingredients.builder()
-                                .ingredientsId(ingredient.getIngredientsId())
                                 .recipeId(recipeId)
                                 .ingredientsName(ingredient.getIngredientsName())
                                 .ingredientsNum(ingredient.getIngredientsNum())
@@ -160,58 +170,48 @@ public class RecipeService {
         }
     }
 
+
     private void saveCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
-        List<CookingOrderDto> steps = recipeRequestDto.getCookingOrders();
-        if (!steps.isEmpty() && steps != null) {
-            int idx = 1;
-            for (int i = 0; i < steps.size(); i++) {
-                String imagePath = null ;
-                String content = steps.get(i).getContent();
-                MultipartFile image = stepImages.get(i);
+        List<CookingOrderDto> steps = recipeRequestDto.getCookingSteps();
 
-                try {
-                    imagePath = imageService.saveCookingOrderImage(image);
-                } catch (Exception e) {
-                    throw new ImageSaveException("이미지 저장 중 에러발생", e);
-                }
+        if (!steps.isEmpty() && steps != null) return ;
 
-                cookingOrderRepository.save(
-                        CookingOrder.builder()
-                                .recipeId(recipeId)
-                                .order(idx)
-                                .content(content)
-                                .imgPath(imagePath)
-                                .build()
-                );
+        int idx = 1;
 
-                idx ++;
-            }
+        for (int i = 0; i < steps.size(); i++) {
+            MultipartFile stepImage =  stepImages.get(i);
+            CookingOrderDto step = steps.get(i);
+            imageService.saveCookingOrderImageMetaAndFile(step, stepImage, recipeId, idx);
+            idx ++;
         }
+
+        imageService.registerCookingOrderImageFileSaveTask();
+
     }
 
-    private void updateCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
-        List<CookingOrderDto> steps = recipeRequestDto.getCookingOrders();
-        if (!steps.isEmpty() && steps != null ) {
-            int idx = 1;
-            for (int i = 0; i < steps.size(); i++) {
-                String content = steps.get(i).getContent();
-                MultipartFile image = stepImages.get(i);
-                String imagePath = imageService.saveCookingOrderImage(image);
-
-                // 저장 로직: content + image 조합
-                cookingOrderRepository.save(
-                        CookingOrder.builder()
-                                .recipeId(recipeId)
-                                .order(idx)
-                                .content(content)
-                                .imgPath(imagePath)
-                                .build()
-                );
-
-                idx ++;
-            }
-        }
-    }
+//    private void updateCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
+//        List<CookingOrderDto> steps = recipeRequestDto.getCookingOrders();
+//        if (!steps.isEmpty() && steps != null ) {
+//            int idx = 1;
+//            for (int i = 0; i < steps.size(); i++) {
+//                String content = steps.get(i).getContent();
+//                MultipartFile image = stepImages.get(i);
+//                String imagePath = imageService.saveCookingOrderImage(image);
+//
+//                // 저장 로직: content + image 조합
+//                cookingOrderRepository.save(
+//                        CookingOrder.builder()
+//                                .recipeId(recipeId)
+//                                .order(idx)
+//                                .content(content)
+//                                .imgPath(imagePath)
+//                                .build()
+//                );
+//
+//                idx ++;
+//            }
+//        }
+//    }
 
     @Transactional
     public void deleteRecipe(UUID recipeId) {

@@ -1,12 +1,17 @@
 package jwhs.cheftoo.image.service;
 
 import jakarta.transaction.Transactional;
+import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
+import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
+import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -15,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,9 +36,45 @@ public class ImageService {
     String cookingOrderImagePath;
 
     private ImageRepository imageRepository;
+    private CookingOrderRepository cookingOrderRepository;
 
-    public ImageService(ImageRepository imageRepository) {
+    public ImageService(ImageRepository imageRepository, CookingOrderRepository cookingOrderRepository) {
         this.imageRepository = imageRepository;
+        this.cookingOrderRepository = cookingOrderRepository;
+    }
+
+    // 트랜잭션 커밋 후 조리순서 이미지 저장하는 작업 저장
+    private static final ThreadLocal<List<Runnable>> deferredImageSaves = ThreadLocal.withInitial(ArrayList::new);
+
+    // 조리순서 이미지 저장 작업 추가
+    private void addDeferredImageSave(Runnable task) {
+        deferredImageSaves.get().add(task);
+    }
+
+    // 트랜잭션 커밋 후 조리순서 이미지 저장
+    public void registerCookingOrderImageFileSaveTask() {
+        List<Runnable> tasks = deferredImageSaves.get();
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                for (Runnable task : tasks) {
+                    task.run();
+                }
+                tasks.clear(); // 현재 쓰레드의 리스트 초기화
+            }
+        });
+    }
+
+
+    // 트랜잭션 커밋 후, 파일시스템에 메인이미지 저장
+    public void registerMainImageFileSaveTask(Runnable task) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                task.run();
+            }
+        });
     }
 
     public Images findMainImageByRecipeId(UUID recipeId) {
@@ -59,20 +102,12 @@ public class ImageService {
 
 
     // 대표 이미지 저장
-    public UUID saveMainImage(MultipartFile file, UUID memberId, UUID recipeId) {
+    public UUID saveMainImageMetaAndFile(MultipartFile file, UUID memberId, UUID recipeId) {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String dirPath = mainImagePath + "/" + today + "/";
         String path = dirPath + fileName;
 
-        checkAndMakeDir(dirPath);
-
-        File dest = new File(path);
-        try {
-            file.transferTo(dest);
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 저장 실패", e);
-        }
 
         //이미지 테이블에 이미지 메타데이터 저장
         Images saved = imageRepository.save(
@@ -82,64 +117,77 @@ public class ImageService {
                         .imgPath(path)
                         .build());
 
+        // 트랜잭션 커밋 후, 메인 이미지 파일 저장
+        registerMainImageFileSaveTask(() -> {
+            checkAndMakeDir(dirPath);
+            File dest = new File(path);
+            try {
+                file.transferTo(dest);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        });
+
         return saved.getImageId();
 
     }
 
     // 레시피의 조리순서에 존재하는 이미지 저장
-    public String saveCookingOrderImage(MultipartFile file)  {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    public void saveCookingOrderImageMetaAndFile(CookingOrderDto step, MultipartFile stepImage, UUID recipeId, int idx)  {
+        // 이미지의 메타 데이터 저장
+        String fileName = UUID.randomUUID() + "_" + stepImage.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String dirPath = cookingOrderImagePath + "/" + today + "/";
         String path = dirPath + fileName;
 
-        checkAndMakeDir(dirPath);
-
-        File dest = new File(path);
-
-        try {
-            file.transferTo(dest);
-            return path;
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 저장 실패", e);
-        }
-    }
+        cookingOrderRepository.save(
+                CookingOrder.builder()
+                        .recipeId(recipeId)
+                        .order(idx)
+                        .content(step.getContent())
+                        .imgPath(path)
+                        .build()
+        );
 
 
-    /**
-     * 메인이미지 업데이트
-     * Images 테이블에 데이터가 없다면 -> 새로 저장
-     * 새로 업로드한 이미지와 기존 존재하던 이미지가 동일하다면 -> 아무것도 안함
-     * 새로 업로드한 이미지와 기존 존재하던 이미지가 다르다면 -> 삭제 후 새로 저장
-     * @param file
-     * @param recipeId
-     * @param memberId
-     * @return
-     * @throws IOException
-     */
-    public UUID updateMainImage(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
-        Images image = imageRepository.findMainImageByRecipeId(recipeId)
-                .orElse(null);
-
-        if (image == null ) { // 새로 저장
-            return saveMainImage(file, memberId, recipeId);
-        }
-
-        // 이미 저장된 이미지가 있다면 -> 저장된 이미지의 해시값과 비교
-        String existingImagePath = image.getImgPath();
-        String existingImageHash = getImageHash(new File(existingImagePath));
-        String uploadImageHash = getImageHash(file);
-
-        if (existingImageHash.equals(uploadImageHash)) { // 기존 이미지와 동일하면 아무것도 안함
-            return image.getImageId();
-        }
-
-        deleteMainImage(image.getImageId(), existingImagePath); // 기존 이미지와 다르면 삭제
-
-        return saveMainImage(file, memberId, recipeId);
-
+        // 트랜잭션 커밋 후, 이미지 저장
+        addDeferredImageSave(() -> {
+            checkAndMakeDir(dirPath);
+            File dest = new File(path);
+            try {
+                stepImage.transferTo(dest);
+            } catch (IOException e) {
+                throw new RuntimeException("조리순서 이미지 저장 실패", e);
+            }
+        });
 
     }
+
+
+
+//    public UUID updateMainImage(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
+//        Images image = imageRepository.findMainImageByRecipeId(recipeId)
+//                .orElse(null);
+//
+//        if (image == null ) { // 새로 저장
+//            return saveMainImage(file, memberId, recipeId);
+//        }
+//
+//        // 이미 저장된 이미지가 있다면 -> 저장된 이미지의 해시값과 비교
+//        String existingImagePath = image.getImgPath();
+//        String existingImageHash = getImageHash(new File(existingImagePath));
+//        String imageHash = getImageHash(file);
+//
+//        if (existingImageHash.equals(imageHash)) { // 기존 이미지와 동일하면 아무것도 안함
+//            return image.getImageId();
+//        }
+//
+//        deleteMainImage(image.getImageId(), existingImagePath); // 기존 이미지와 다르면 삭제
+//
+//        return saveMainImage(file, memberId, recipeId);
+//
+//
+//    }
 
 
 
