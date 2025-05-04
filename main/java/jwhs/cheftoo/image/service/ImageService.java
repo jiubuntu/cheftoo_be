@@ -1,12 +1,15 @@
 package jwhs.cheftoo.image.service;
 
 import jakarta.transaction.Transactional;
+import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
+import jwhs.cheftoo.cookingOrder.dto.CookingOrderRequestSaveDto;
 import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
 import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -77,8 +80,8 @@ public class ImageService {
         });
     }
 
-    public Images findMainImageByRecipeId(UUID recipeId) {
-        return imageRepository.findMainImageByRecipeId(recipeId)
+    public Images findMainImageByRecipeId(Recipe recipe) {
+        return imageRepository.findMainImageByRecipe(recipe)
                 .orElseThrow(() -> new MainImageNotFoundException("레시피의 대표 이미지를 찾을 수 없습니다."));
     }
 
@@ -102,7 +105,7 @@ public class ImageService {
 
 
     // 대표 이미지 저장
-    public UUID saveMainImageMetaAndFile(MultipartFile file, UUID memberId, UUID recipeId) {
+    public UUID saveMainImageMetaAndFile(MultipartFile file, Member member, Recipe recipe) {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String dirPath = mainImagePath + "/" + today + "/";
@@ -112,8 +115,8 @@ public class ImageService {
         //이미지 테이블에 이미지 메타데이터 저장
         Images saved = imageRepository.save(
                 Images.builder()
-                        .recipeId(recipeId)
-                        .memberId(memberId)
+                        .recipe(recipe)
+                        .memberId(member)
                         .imgPath(path)
                         .build());
 
@@ -133,7 +136,7 @@ public class ImageService {
     }
 
     // 레시피의 조리순서에 존재하는 이미지 저장
-    public void saveCookingOrderImageMetaAndFile(CookingOrderDto step, MultipartFile stepImage, UUID recipeId, int idx)  {
+    public void saveCookingOrderImageMetaAndFile(CookingOrderRequestSaveDto step, MultipartFile stepImage, Recipe recipe, int idx)  {
         // 이미지의 메타 데이터 저장
         String fileName = UUID.randomUUID() + "_" + stepImage.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -142,7 +145,7 @@ public class ImageService {
 
         cookingOrderRepository.save(
                 CookingOrder.builder()
-                        .recipeId(recipeId)
+                        .recipe(recipe)
                         .order(idx)
                         .content(step.getContent())
                         .imgPath(path)
@@ -210,8 +213,8 @@ public class ImageService {
 
     }
 
-    public void deleteByRecipeId(UUID recipeId) {
-        imageRepository.deleteByRecipeId(recipeId);
+    public void deleteByRecipeId(Recipe recipe) {
+        imageRepository.deleteByRecipe(recipe);
 
     }
 

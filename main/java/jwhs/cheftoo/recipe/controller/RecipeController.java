@@ -1,10 +1,12 @@
 package jwhs.cheftoo.recipe.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,11 +46,18 @@ public class RecipeController {
 
     @PostMapping
     public ResponseEntity<?> createRecipe(
-            @RequestPart("data") RecipeRequestDto dto,
+            @RequestPart("data") MultipartFile jsonFile,
             @RequestPart("image") MultipartFile imageFile, // 대표 이미지
             @RequestPart("cookingStepImages") List<MultipartFile> stepImages, // 조리순서 이미지
             HttpServletRequest request
     ) {
+        RecipeRequestDto dto;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            dto = mapper.readValue(jsonFile.getInputStream(), RecipeRequestDto.class);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body("JSON 파싱 실패");
+        }
         return handleRecipeSave(dto, imageFile, stepImages, request, null);
     }
 
@@ -91,7 +101,7 @@ public class RecipeController {
         UUID savedRecipeId = null;
 
         if (recipeId == null) { // INSESRT
-            savedRecipeId = recipeService.createRecipe(dto, memberId, imageFile, stepImages);
+            savedRecipeId = recipeService.createRecipe(dto, memberId, imageFile, stepImages).getRecipeId();
         } else { // UPDATE
             try {
 //                savedRecipeId = recipeService.updateRecipe(dto, memberId, imageFile, stepImages, recipeId);

@@ -1,8 +1,12 @@
 package jwhs.cheftoo.recipe.entity;
 
 import jakarta.persistence.*;
+import jwhs.cheftoo.auth.entity.Member;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
 
 import java.time.LocalDateTime;
@@ -24,8 +28,9 @@ public class Recipe {
     @Column(name="RecipeId",updatable = false, nullable = false)
     private UUID recipeId;
 
-    @Column(name="memberId")
-    private UUID memberId;
+    @OneToOne
+    @JoinColumn(name = "memberId", nullable = false)
+    private Member memberId;
 
     @Column(name="RecipeTitle", length=100)
     private String recipeTitle;
@@ -33,9 +38,11 @@ public class Recipe {
     @Column(name="RecipeContent", columnDefinition = "TEXT")
     private String recipeContent;
 
+    @CreationTimestamp
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;
 
+    @UpdateTimestamp
     @Column(name="DataUpdated")
     private LocalDateTime dataUpdated;
 }

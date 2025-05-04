@@ -2,6 +2,7 @@ package jwhs.cheftoo.ingredient.service;
 
 import jwhs.cheftoo.ingredient.entity.Ingredients;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,8 +17,8 @@ public class IngredientService {
         this.ingredientsRepository = ingredientsRepository;
     }
 
-    public Ingredients findByRecipeIdAndIngredientsName(UUID recipeId, String ingedientsName) {
-        Ingredients ingredients = ingredientsRepository.findByRecipeIdAndIngredientsName(recipeId, ingedientsName)
+    public Ingredients findByRecipeAndIngredientsName(Recipe recipe, String ingedientsName) {
+        Ingredients ingredients = ingredientsRepository.findByRecipeAndIngredientsName(recipe, ingedientsName)
                 .orElseGet(null);
         return ingredients;
     }

@@ -2,7 +2,9 @@ package jwhs.cheftoo.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,7 +16,7 @@ public class Member {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "MemberId", updatable = false, nullable = false)
+    @Column(name = "MemberId",updatable = false, nullable = false)
     private UUID memberId;
 
     @Column(name = "KakaoId")
@@ -35,9 +37,11 @@ public class Member {
     @Column(name = "LastLogin")
     private LocalDateTime lastLogin;
 
+    @CreationTimestamp
     @Column(name = "DataCreated")
     private LocalDateTime dataCreated;
 
+    @UpdateTimestamp
     @Column(name = "DataUpdated")
     private LocalDateTime dataUpdated;
 

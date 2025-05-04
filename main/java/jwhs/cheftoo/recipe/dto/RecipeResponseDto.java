@@ -28,7 +28,7 @@ public class RecipeResponseDto {
     public static RecipeResponseDto fromEntity(Recipe recipe) {
         return new RecipeResponseDto(
                 recipe.getRecipeId(),
-                recipe.getMemberId(),
+                recipe.getMemberId().getMemberId(),
                 recipe.getRecipeTitle(),
                 recipe.getRecipeContent(),
                 recipe.getDataCreated(),

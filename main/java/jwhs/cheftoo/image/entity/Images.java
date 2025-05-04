@@ -2,8 +2,12 @@ package jwhs.cheftoo.image.entity;
 
 
 import jakarta.persistence.*;
+import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,18 +28,22 @@ public class Images {
     @Column(name="imageId")
     private UUID imageId;
 
-    @Column(name="recipeId")
-    private UUID recipeId;
+    @OneToOne
+    @JoinColumn(name = "recipeId", nullable = false)
+    private Recipe recipe;
 
-    @Column(name="memberId")
-    private UUID memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "memberId", nullable = false)
+    private Member memberId;
 
     @Column(name="imgPath", length = 255)
     private String imgPath;
 
+    @CreationTimestamp
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;
 
+    @UpdateTimestamp
     @Column(name="DataUpdated")
     private LocalDateTime dataUpdated;
 

@@ -31,8 +31,8 @@ public class RecipeDetailResponseDto {
         public static Images fromEntity(jwhs.cheftoo.image.entity.Images imagesEntity) {
             return Images.builder()
                     .imageId(imagesEntity.getImageId())
-                    .recipeId(imagesEntity.getRecipeId())
-                    .memberId(imagesEntity.getMemberId())
+                    .recipeId(imagesEntity.getRecipe().getRecipeId())
+                    .memberId(imagesEntity.getMemberId().getMemberId())
                     .imgPath(imagesEntity.getImgPath())
                     .build();
         }
@@ -49,7 +49,7 @@ public class RecipeDetailResponseDto {
         public static Ingredients fromEntity(jwhs.cheftoo.ingredient.entity.Ingredients ingredientsEntity) {
             return Ingredients.builder()
                     .ingredientsId(ingredientsEntity.getIngredientsId())
-                    .recipeId(ingredientsEntity.getRecipeId())
+                    .recipeId(ingredientsEntity.getRecipe().getRecipeId())
                     .ingredientsName(ingredientsEntity.getIngredientsName())
                     .ingredientsNum(ingredientsEntity.getIngredientsNum())
                     .build();
@@ -70,7 +70,7 @@ public class RecipeDetailResponseDto {
                             .map(cookingOrderEntity -> {
                                 return CookingOrder.builder()
                                         .cookingOrderId(cookingOrderEntity.getCookingOrderId())
-                                        .recipeId(cookingOrderEntity.getRecipeId())
+                                        .recipeId(cookingOrderEntity.getRecipe().getRecipeId())
                                         .order(cookingOrderEntity.getOrder())
                                         .content(cookingOrderEntity.getContent())
                                         .imgPath(cookingOrderEntity.getImgPath())

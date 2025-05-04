@@ -2,8 +2,11 @@ package jwhs.cheftoo.cookingOrder.entity;
 
 
 import jakarta.persistence.*;
+import jwhs.cheftoo.recipe.entity.Recipe;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,10 +27,11 @@ public class CookingOrder {
     @Column(name = "CookingOrderId")
     private UUID cookingOrderId;
 
-    @Column(name = "recipeId")
-    private UUID recipeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipeId", nullable = false)
+    private Recipe recipe;
 
-    @Column(name = "order")
+    @Column(name = "`order`")
     private long order;
 
     @Column(name = "content")
@@ -36,9 +40,11 @@ public class CookingOrder {
     @Column(name = "imgPath", length = 255)
     private String imgPath;
 
+    @CreationTimestamp
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;
 
+    @UpdateTimestamp
     @Column(name="DataUpdated")
     private LocalDateTime dataUpdated;
 

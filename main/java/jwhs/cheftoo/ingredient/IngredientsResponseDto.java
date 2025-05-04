@@ -17,7 +17,7 @@ public class IngredientsResponseDto {
     public static IngredientsResponseDto fromEntity(Ingredients ingredients) {
         return IngredientsResponseDto.builder()
                 .ingredientsId(ingredients.getIngredientsId())
-                .recipeId(ingredients.getRecipeId())
+                .recipeId(ingredients.getRecipe().getRecipeId())
                 .ingredientsName(ingredients.getIngredientsName())
                 .ingredientsNum(ingredients.getIngredientsNum())
                 .build();

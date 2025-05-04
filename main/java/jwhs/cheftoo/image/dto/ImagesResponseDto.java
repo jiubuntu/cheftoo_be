@@ -17,8 +17,8 @@ public class ImagesResponseDto {
     public static ImagesResponseDto fromEntity(Images images) {
         return ImagesResponseDto.builder()
                 .imageId(images.getImageId())
-                .recipeId(images.getRecipeId())
-                .memberId(images.getMemberId())
+                .recipeId(images.getRecipe().getRecipeId())
+                .memberId(images.getMemberId().getMemberId())
                 .imgPath(images.getImgPath())
                 .build();
     }
