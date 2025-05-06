@@ -78,7 +78,7 @@ public class RecipeService {
 
         return RecipeDetailResponseDto.builder()
                 .recipeId(recipe.getRecipeId())
-                .memberId(recipe.getMemberId().getMemberId())
+                .memberId(recipe.getMember().getMemberId())
                 .recipeTitle(recipe.getRecipeTitle())
                 .recipeContent(recipe.getRecipeContent())
                 .images(images)
@@ -146,7 +146,7 @@ public class RecipeService {
     private Recipe saveRecipe(UUID recipeId, Member member, RecipeRequestDto recipeRequestDto) {
         Recipe recipe = Recipe.builder()
                 .recipeId(recipeId)
-                .memberId(member)
+                .member(member)
                 .recipeTitle(recipeRequestDto.getRecipeTitle())
                 .recipeContent(recipeRequestDto.getRecipeContent())
                 .build();

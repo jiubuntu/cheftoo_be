@@ -18,7 +18,7 @@ public class ImagesResponseDto {
         return ImagesResponseDto.builder()
                 .imageId(images.getImageId())
                 .recipeId(images.getRecipe().getRecipeId())
-                .memberId(images.getMemberId().getMemberId())
+                .memberId(images.getMember().getMemberId())
                 .imgPath(images.getImgPath())
                 .build();
     }

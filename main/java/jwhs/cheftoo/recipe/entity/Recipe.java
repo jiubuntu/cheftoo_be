@@ -14,7 +14,13 @@ import java.util.UUID;
 
 // 레시피
 @Entity
-@Table(name="Recipe")
+@Table(name="Recipe",
+        indexes = {
+            @Index(name = "idx_member_id", columnList = "memberId"),
+            @Index(name = "idx_recipe_title", columnList = "recipeTitle"),
+            @Index(name = "idx_member_recipe_title", columnList = "memberId, recipeTitle")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,7 +36,7 @@ public class Recipe {
 
     @OneToOne
     @JoinColumn(name = "memberId", nullable = false)
-    private Member memberId;
+    private Member member;
 
     @Column(name="RecipeTitle", length=100)
     private String recipeTitle;

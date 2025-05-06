@@ -32,7 +32,7 @@ public class RecipeDetailResponseDto {
             return Images.builder()
                     .imageId(imagesEntity.getImageId())
                     .recipeId(imagesEntity.getRecipe().getRecipeId())
-                    .memberId(imagesEntity.getMemberId().getMemberId())
+                    .memberId(imagesEntity.getMember().getMemberId())
                     .imgPath(imagesEntity.getImgPath())
                     .build();
         }

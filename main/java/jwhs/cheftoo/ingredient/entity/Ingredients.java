@@ -18,7 +18,11 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="Ingredients")
+@Table(name="Ingredients",
+        indexes = {
+            @Index(name = "idx_recipe_id", columnList = "recipeId")
+        }
+)
 @Builder
 public class Ingredients {
 

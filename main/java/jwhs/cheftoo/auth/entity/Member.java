@@ -11,7 +11,12 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name="Member")
+@Table(name="Member",
+        indexes = {
+            @Index(name = "idx_kakao_id", columnList = "kakaoId"),
+            @Index(name = "idx_nickname", columnList = "nickname")
+        }
+)
 public class Member {
     @Id
     @GeneratedValue(generator = "UUID")

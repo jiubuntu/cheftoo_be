@@ -116,7 +116,7 @@ public class ImageService {
         Images saved = imageRepository.save(
                 Images.builder()
                         .recipe(recipe)
-                        .memberId(member)
+                        .member(member)
                         .imgPath(path)
                         .build());
 

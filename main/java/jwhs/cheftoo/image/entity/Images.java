@@ -19,7 +19,13 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Images")
+@Table(name = "Images",
+        indexes = {
+            @Index(name = "idx_recipe_id", columnList = "recipeId"),
+            @Index(name = "idx_member_id", columnList = "memberId"),
+            @Index(name = "idx_member_recipe", columnList = "memberId, recipeId")
+        }
+)
 @Builder
 public class Images {
     @Id
@@ -34,7 +40,7 @@ public class Images {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
-    private Member memberId;
+    private Member member;
 
     @Column(name="imgPath", length = 255)
     private String imgPath;
