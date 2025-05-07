@@ -65,7 +65,7 @@ public class RecipeDetailResponseDto {
         private String content;
         private String imgPath;
 
-        public static List<CookingOrder> fromEntity(List<jwhs.cheftoo.cookingOrder.entity.CookingOrder> cookingOrderEntitys) {
+        public static List<CookingOrder> fromEntity(List<jwhs.cheftoo.cookingorder.entity.CookingOrder> cookingOrderEntitys) {
             return cookingOrderEntitys.stream()
                             .map(cookingOrderEntity -> {
                                 return CookingOrder.builder()

@@ -1,6 +1,6 @@
-package jwhs.cheftoo.cookingOrder.repository;
+package jwhs.cheftoo.cookingorder.repository;
 
-import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
+import jwhs.cheftoo.cookingorder.entity.CookingOrder;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import org.springframework.data.jpa.repository.JpaRepository;
 

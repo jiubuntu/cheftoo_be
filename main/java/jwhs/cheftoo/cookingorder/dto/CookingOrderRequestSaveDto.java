@@ -1,4 +1,4 @@
-package jwhs.cheftoo.cookingOrder.dto;
+package jwhs.cheftoo.cookingorder.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,7 +1,7 @@
-package jwhs.cheftoo.cookingOrder.entity;
-
+package jwhs.cheftoo.comment.entity;
 
 import jakarta.persistence.*;
+import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,46 +11,41 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// 조리순서
 @Entity
+@Table(name = "Comment",
+        indexes = {
+            @Index(name = "idx_member_id", columnList = "memberId"),
+            @Index(name = "idx_recipe_id", columnList = "recipeId")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "CookingOrder",
-        indexes = {
-            @Index(name = "idx_recipe_id", columnList = "recipeId"),
-            @Index(name = "idx_recipe_order", columnList = "recipeId, order")
-        }
-)
-public class CookingOrder {
-
+public class Comment {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "CookingOrderId")
-    private UUID cookingOrderId;
+    @Column(name = "CommentId", updatable = false, nullable = false)
+    private UUID commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipeId", nullable = false)
+    @JoinColumn(name = "memberId")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipeId")
     private Recipe recipe;
 
-    @Column(name = "`order`")
-    private long order;
-
-    @Column(name = "content")
-    private String content;
-
-    @Column(name = "imgPath", length = 255)
-    private String imgPath;
+    @Column(name = "CommentContent")
+    private String commentContent;
 
     @CreationTimestamp
-    @Column(name="DataCreated")
+    @Column(name = "DataCreated")
     private LocalDateTime dataCreated;
 
     @UpdateTimestamp
     @Column(name="DataUpdated")
     private LocalDateTime dataUpdated;
-
 }

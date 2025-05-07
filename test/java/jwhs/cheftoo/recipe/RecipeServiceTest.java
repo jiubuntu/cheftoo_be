@@ -1,10 +1,9 @@
 package jwhs.cheftoo.recipe;
 
 
-import jakarta.persistence.Column;
-import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
-import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
-import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
+import jwhs.cheftoo.cookingorder.dto.CookingOrderDto;
+import jwhs.cheftoo.cookingorder.entity.CookingOrder;
+import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
@@ -26,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

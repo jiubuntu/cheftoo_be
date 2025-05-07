@@ -1,12 +1,10 @@
-package jwhs.cheftoo.cookingOrder.dto;
+package jwhs.cheftoo.cookingorder.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 

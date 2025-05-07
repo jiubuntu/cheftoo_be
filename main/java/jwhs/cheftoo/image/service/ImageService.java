@@ -1,11 +1,9 @@
 package jwhs.cheftoo.image.service;
 
-import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
-import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
-import jwhs.cheftoo.cookingOrder.dto.CookingOrderRequestSaveDto;
-import jwhs.cheftoo.cookingOrder.entity.CookingOrder;
-import jwhs.cheftoo.cookingOrder.repository.CookingOrderRepository;
+import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
+import jwhs.cheftoo.cookingorder.entity.CookingOrder;
+import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;

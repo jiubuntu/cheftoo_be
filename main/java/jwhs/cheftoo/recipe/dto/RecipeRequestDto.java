@@ -2,9 +2,7 @@ package jwhs.cheftoo.recipe.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jwhs.cheftoo.cookingOrder.dto.CookingOrderDto;
-import jwhs.cheftoo.cookingOrder.dto.CookingOrderRequestSaveDto;
-import jwhs.cheftoo.ingredient.dto.IngredientsDto;
+import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
 import jwhs.cheftoo.ingredient.dto.IngredientsRequestSaveDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
