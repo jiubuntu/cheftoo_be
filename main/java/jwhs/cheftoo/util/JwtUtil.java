@@ -71,7 +71,7 @@ public class JwtUtil {
         cookie.setHttpOnly(true);
 //        cookie.setSecure(true); // https에서만 전송
         cookie.setPath("/");
-        cookie.setMaxAge((int) (expirationTime / 1000)); // 쿠키만료시간 설정
+        cookie.setMaxAge((int) (expirationTime / 1000)); // 쿠키만료시간 설정 (1시간)
         response.addCookie(cookie); // 클라이언트에 쿠키 저장
     }
 

@@ -35,12 +35,12 @@ public class RecipeController {
     }
 
     @GetMapping("/{recipeId}")
-    public ResponseEntity<?> getRecipe(@RequestParam UUID recipeId) {
+    public ResponseEntity<?> getRecipe(@PathVariable UUID recipeId) {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
     }
 
-    @GetMapping("/")
-    public ResponseEntity<?> getAllRecipe(@RequestParam UUID recipeId) {
+    @GetMapping
+    public ResponseEntity<?> getAllRecipe() {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes());
     }
 
@@ -75,7 +75,7 @@ public class RecipeController {
 
     @DeleteMapping("/{recipeId}")
     public ResponseEntity<?> deleteRecipe(
-            @RequestParam UUID recipeId
+            @PathVariable UUID recipeId
     ) {
         try {
             recipeService.deleteRecipe(recipeId);

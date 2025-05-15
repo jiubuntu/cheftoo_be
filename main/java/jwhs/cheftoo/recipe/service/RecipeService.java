@@ -95,7 +95,7 @@ public class RecipeService {
             // 1. 레시피 저장
             Recipe recipe =  saveRecipe(null, member, recipeRequestDto);
 
-            // 2. 대표 이미지 업데이트
+            // 2. 대표 이미지 저장
             saveMainImage(imageFile, member, recipe);
 
             // 3. 재료 저장
@@ -111,28 +111,29 @@ public class RecipeService {
     }
 
 
-//    @Transactional
-//    public UUID updateRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages, UUID recipeId) throws  IOException{
-//        try {
-//            // 1. 레시피 저장
-//            saveRecipe(recipeId, memberId, recipeRequestDto);
-//
-//            // 2. 대표 이미지 업데이트
-//            saveMainImage(imageFile, memberId, recipeId);
-//
-//            // 3. 재료 저장
-//            saveIngredienets(recipeRequestDto, recipeId);
-//
-////            // 4. 조리순서 저장
-////            updateCookingOrders(recipeRequestDto, stepImages, recipeId);
-//
-//            return recipeId;
-//        } catch ( RecipeCreateException e) {
-//            throw new RecipeCreateException("레시피 UPDATE 중 에러 발생");
-//        }
-//
-//
-//    }
+    @Transactional
+    public UUID updateRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages, UUID recipeId) throws  IOException{
+        try {
+            Member member = memberService.findMemberById(memberId);
+            // 1. 레시피 저장
+            Recipe recipe =  saveRecipe(recipeId, member, recipeRequestDto);
+
+            // 2. 대표 이미지 업데이트
+            saveMainImage(imageFile, member, recipe);
+
+            // 3. 재료 저장
+            saveIngredienets(recipeRequestDto, recipe);
+
+//            // 4. 조리순서 저장
+//            updateCookingOrders(recipeRequestDto, stepImages, recipeId);
+
+            return recipeId;
+        } catch ( RecipeCreateException e) {
+            throw new RecipeCreateException("레시피 UPDATE 중 에러 발생");
+        }
+
+
+    }
 
     private Recipe saveRecipe(UUID recipeId, Member member, RecipeRequestDto recipeRequestDto) {
         Recipe recipe = Recipe.builder()

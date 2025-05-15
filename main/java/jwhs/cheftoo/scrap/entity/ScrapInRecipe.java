@@ -27,7 +27,7 @@ public class ScrapInRecipe {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name="UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "ScrapId", updatable = false, nullable = false)
+    @Column(name = "ScrapInRecipeId", updatable = false, nullable = false)
     private UUID scrapInRecipeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
