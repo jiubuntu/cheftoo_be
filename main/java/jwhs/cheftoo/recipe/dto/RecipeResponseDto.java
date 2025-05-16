@@ -20,19 +20,22 @@ public class RecipeResponseDto {
     private UUID memberId;
     private String recipeTitle;
     private String recipeContent;
+    private String nickName;
+    private String imgPath;
     private LocalDateTime dataCreated;
     private LocalDateTime dataUpdated;
 
 
     // Entity를 Dto로 변환
-    public static RecipeResponseDto fromEntity(Recipe recipe) {
+    public static RecipeResponseDto fromEntity(Recipe recipe, String imgPath) {
         return new RecipeResponseDto(
                 recipe.getRecipeId(),
                 recipe.getMember().getMemberId(),
                 recipe.getRecipeTitle(),
                 recipe.getRecipeContent(),
+                recipe.getMember().getNickname(),
+                imgPath,
                 recipe.getDataCreated(),
-
                 recipe.getDataUpdated()
 
         );

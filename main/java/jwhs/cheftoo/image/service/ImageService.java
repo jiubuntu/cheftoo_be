@@ -166,11 +166,11 @@ public class ImageService {
 
 
 
-//    public UUID updateMainImage(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
+//    public UUID checkAnd(MultipartFile file, UUID recipeId, UUID memberId ) throws IOException{
 //        Images image = imageRepository.findMainImageByRecipeId(recipeId)
 //                .orElse(null);
 //
-//        if (image == null ) { // 새로 저장
+//        if ( image == null ) { // 새로 저장
 //            return saveMainImage(file, memberId, recipeId);
 //        }
 //

@@ -84,7 +84,10 @@ public class RecipeService {
         List<Recipe> recipeList = recipeRepository.findAll();
 
         return recipeList.stream()
-                .map(RecipeResponseDto:: fromEntity)
+                .map(recipe -> {
+                    String imgPath = imageService.findMainImageByRecipeId(recipe).getImgPath();
+                    return RecipeResponseDto.fromEntity(recipe, imgPath);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -116,7 +119,7 @@ public class RecipeService {
         try {
             Member member = memberService.findMemberById(memberId);
             // 1. 레시피 저장
-            Recipe recipe =  saveRecipe(recipeId, member, recipeRequestDto);
+            Recipe recipe = saveRecipe(recipeId, member, recipeRequestDto);
 
             // 2. 대표 이미지 업데이트
             saveMainImage(imageFile, member, recipe);
@@ -155,6 +158,13 @@ public class RecipeService {
             return null;
         }
     }
+
+//    private UUID updateMainImage(MultipartFile imageFile, Member member, Recipe recipe) {
+        // 파일시스템에 저장된 메인이미지와 다른지 비교
+
+        // 다르면 저장
+        // 같으면 pass
+//    }
 
     private void saveIngredienets(RecipeRequestDto recipeRequestDto, Recipe recipe) {
         if (recipeRequestDto.getIngredients().size() > 0) {
