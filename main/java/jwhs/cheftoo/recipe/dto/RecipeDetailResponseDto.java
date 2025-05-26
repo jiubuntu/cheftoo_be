@@ -17,7 +17,7 @@ public class RecipeDetailResponseDto {
     private String recipeTitle;
     private String recipeContent;
     private Images images;
-    private Ingredients ingredients;
+    private List<Ingredients> ingredients;
     private List<CookingOrder> cookingOrder;
 
     @Getter

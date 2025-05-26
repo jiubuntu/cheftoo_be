@@ -34,7 +34,7 @@ public class Recipe {
     @Column(name="RecipeId",updatable = false, nullable = false)
     private UUID recipeId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 

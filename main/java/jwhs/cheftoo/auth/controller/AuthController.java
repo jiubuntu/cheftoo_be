@@ -45,4 +45,13 @@ public class AuthController {
        return ResponseEntity.noContent().build(); // HttpsStatusCode = 204
 
     }
+
+    @GetMapping("/member")
+    public ResponseEntity<?> getNickNameByMember(HttpServletRequest request) {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.findNickNameByMemberId(memberId));
+
+    }
 }

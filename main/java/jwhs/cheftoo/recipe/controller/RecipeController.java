@@ -39,6 +39,14 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
     }
 
+    @GetMapping("/member")
+    public ResponseEntity<?> getAllRecipeByMember( HttpServletRequest request) {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipesByMember(memberId)) ;
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllRecipe() {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes());

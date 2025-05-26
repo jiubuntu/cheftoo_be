@@ -61,8 +61,11 @@ public class RecipeService {
         RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipeId(recipe));
 
         // 재료 조회
-        RecipeDetailResponseDto.Ingredients ingredients =
-                RecipeDetailResponseDto.Ingredients.fromEntity(ingredientsRepository.findByRecipe(recipe).orElseThrow(() -> new NoSuchElementException("레시피에 해당하는 재료를 찾을 수 없습니다.")));
+        List<Ingredients> ingredientsList = ingredientsRepository.findAllByRecipe(recipe);
+        List<RecipeDetailResponseDto.Ingredients> ingredients = ingredientsList.stream()
+                .map(RecipeDetailResponseDto.Ingredients::fromEntity)
+                .collect(Collectors.toList());
+
 
         // 조리순서 조회
         List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderRepository.findByRecipeOrderByOrderDesc(recipe));
@@ -79,6 +82,19 @@ public class RecipeService {
     }
 
 
+    // 특정 멤버의 레시피 조회
+    public List<RecipeResponseDto> findAllRecipesByMember(UUID memberId) {
+
+        Member member = memberService.findMemberById(memberId);
+        return  recipeRepository.findAllByMember(member).stream()
+                .map(recipe -> {
+                    String imgPath = imageService.findMainImageByRecipeId(recipe).getImgPath();
+                    return RecipeResponseDto.fromEntity(recipe, imgPath);
+                })
+                .collect(Collectors.toList());
+    }
+
+
     // 전체조회
     public List<RecipeResponseDto> findAllRecipes() {
         List<Recipe> recipeList = recipeRepository.findAll();
@@ -90,6 +106,7 @@ public class RecipeService {
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public Recipe createRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages) {
