@@ -3,6 +3,7 @@ package jwhs.cheftoo.recipe.repository;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;

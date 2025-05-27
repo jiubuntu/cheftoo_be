@@ -34,7 +34,7 @@ public class AuthController {
     // 닉네임 설정
     @PutMapping("/nickname")
     public ResponseEntity<?> setNickName(
-            @RequestParam String nickname,
+            @RequestParam("nickname") String nickname,
             HttpServletRequest request
     ) {
        String token = jwtUtil.getTokenFromRequest(request);
@@ -46,7 +46,8 @@ public class AuthController {
 
     }
 
-    @GetMapping("/member")
+    // 멤버ID를 통해 닉네임 조회
+    @GetMapping("/nickname")
     public ResponseEntity<?> getNickNameByMember(HttpServletRequest request) {
         String token = jwtUtil.getTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
