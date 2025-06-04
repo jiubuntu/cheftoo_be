@@ -44,8 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtUtil.getTokenFromRequest(request);
 
         if (!jwtUtil.validateToken(token)) {
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            response.getWriter().write("{\"error\" : \"Unauthorized\"}");
             //JWT 토큰이 유효하지 않으면 다시 로그인 화면으로 이동
             response.sendRedirect(KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code");
             return ;

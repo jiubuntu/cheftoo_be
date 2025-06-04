@@ -2,6 +2,7 @@ package jwhs.cheftoo.global;
 
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
+import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,6 +25,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR) // or BAD_REQUEST
+                .body(error);
+    }
+
+    @ExceptionHandler(RecipeNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRecipeNotFoundException(RecipeNotFoundException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "레시피를 찾을 수 없습니다.");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(error);
     }
 
