@@ -1,12 +1,15 @@
 package jwhs.cheftoo.comment.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jwhs.cheftoo.comment.dto.CommentRequestDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
 import jwhs.cheftoo.comment.service.CommentService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,15 +17,32 @@ import java.util.UUID;
 public class CommentController {
 
     private CommentService commentService;
+    private JwtUtil jwtUtil;
 
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService, JwtUtil jwtUtil) {
+
         this.commentService = commentService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("recipe/comment/{recipeId}")
-    public List<CommentResponseDto> getAllCommentByRecipe(@PathVariable UUID recipeId) {
-        return commentService.findAllCommentByRecipe(recipeId);
+    public ResponseEntity<List<CommentResponseDto>> getAllCommentByRecipe(@PathVariable UUID recipeId) {
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.findAllCommentByRecipe(recipeId));
     }
+
+    // 댓글 저장
+    @PostMapping("recipe/{recipeId}/comment")
+    public ResponseEntity<CommentResponseDto> saveComment(
+            HttpServletRequest request,
+            CommentRequestDto dto,
+            @PathVariable UUID recipeId
+    ) {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.createComment(dto, memberId, recipeId));
+    }
+
 
 
 

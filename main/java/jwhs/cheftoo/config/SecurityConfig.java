@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/oauth/kakao/callback").permitAll()
                     .requestMatchers("/mypage").authenticated()
+                    .requestMatchers(HttpMethod.POST,"/recipe/*/comment").authenticated()
                     .requestMatchers(HttpMethod.POST,"/recipes").authenticated() // 레시피 등록은 권한필요
                     .anyRequest().permitAll()
                 )
