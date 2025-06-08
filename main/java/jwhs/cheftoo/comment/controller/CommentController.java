@@ -43,7 +43,18 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.createComment(dto, memberId, recipeId));
     }
 
+    // 댓글 삭제
+    @DeleteMapping("recipe/comment/{commentId}")
+    public ResponseEntity<?> deleteComment(
+            @PathVariable UUID commentId,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
+        commentService.deleteComment(commentId, memberId);
+        return ResponseEntity.ok().build();
+    }
 
 
 }

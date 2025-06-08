@@ -35,7 +35,8 @@ public class SecurityConfig {
                     .requestMatchers("/oauth/kakao/callback").permitAll()
                     .requestMatchers("/mypage").authenticated()
                     .requestMatchers(HttpMethod.POST,"/recipe/*/comment").authenticated()
-                    .requestMatchers(HttpMethod.POST,"/recipes").authenticated() // 레시피 등록은 권한필요
+                    .requestMatchers(HttpMethod.DELETE,"/recipe/comment/*").authenticated()
+                    .requestMatchers(HttpMethod.POST,"/recipes").authenticated()
                     .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)

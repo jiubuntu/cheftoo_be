@@ -9,6 +9,8 @@ import jwhs.cheftoo.comment.dto.CommentRequestDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
 import jwhs.cheftoo.comment.dto.CommentSummaryDto;
 import jwhs.cheftoo.comment.entity.Comment;
+import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
+import jwhs.cheftoo.comment.exception.CommentNotFoundException;
 import jwhs.cheftoo.comment.repository.CommentRepository;
 import jwhs.cheftoo.comment.repository.CommentRepositoryCustom;
 import jwhs.cheftoo.recipe.entity.Recipe;
@@ -76,5 +78,21 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return CommentResponseDto.fromEntity(savedComment, comment.getMember().getNickname());
+    }
+
+
+    @Transactional
+    public void deleteComment(UUID commentId, UUID memberId) {
+        // 댓글을 작성한 멤버인지 확인
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> {
+            throw new CommentNotFoundException("댓글을 찾을 수 없습니다.");
+        });
+
+        if (!comment.getMember().getMemberId().equals(memberId)) {
+            throw new CommentAccessDeniedException("로그인된 유저와 댓글 작성자가 일치하지 않습니다.");
+        }
+
+        commentRepository.deleteById(commentId);
+
     }
 }

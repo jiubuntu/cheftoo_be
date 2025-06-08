@@ -1,6 +1,8 @@
 package jwhs.cheftoo.global;
 
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
+import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
+import jwhs.cheftoo.comment.exception.CommentNotFoundException;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -58,6 +60,28 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND) // or BAD_REQUEST
+                .body(error);
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCommentNotFoundException(CommentNotFoundException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "CommentNotFoundException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND) // or BAD_REQUEST
+                .body(error);
+    }
+
+    @ExceptionHandler(CommentAccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleCommentAccessDeniedException(CommentAccessDeniedException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "CommentAccessDeniedException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(error);
     }
 
