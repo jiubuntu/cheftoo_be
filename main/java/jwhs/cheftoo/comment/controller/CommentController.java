@@ -34,7 +34,7 @@ public class CommentController {
     @PostMapping("recipe/{recipeId}/comment")
     public ResponseEntity<CommentResponseDto> saveComment(
             HttpServletRequest request,
-            CommentRequestDto dto,
+            @RequestBody CommentRequestDto dto,
             @PathVariable UUID recipeId
     ) {
         String token = jwtUtil.getTokenFromRequest(request);
