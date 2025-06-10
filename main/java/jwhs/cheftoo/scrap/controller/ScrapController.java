@@ -22,14 +22,14 @@ public class ScrapController {
         this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("member/scrap")
-    public List<ScrapResponseDto> getScrapByMember(
-            HttpServletRequest request
-    ) {
-
-        String token = jwtUtil.getTokenFromRequest(request);
-        UUID memberId = jwtUtil.getMemberIdFromToken(token);
-
-        return scrapService.findAllByMemberId(memberId);
-    }
+//    @GetMapping("member/scrap")
+//    public List<ScrapResponseDto> getScrapByMember(
+//            HttpServletRequest request
+//    ) {
+//
+//        String token = jwtUtil.getTokenFromRequest(request);
+//        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+//
+//        return scrapService.findAllByMemberId(memberId);
+//    }
 }

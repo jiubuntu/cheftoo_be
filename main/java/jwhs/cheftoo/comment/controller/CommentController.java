@@ -35,7 +35,7 @@ public class CommentController {
     public ResponseEntity<CommentResponseDto> saveComment(
             HttpServletRequest request,
             @RequestBody CommentRequestDto dto,
-            @PathVariable UUID recipeId
+            @PathVariable("recipeId") UUID recipeId
     ) {
         String token = jwtUtil.getTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);

@@ -21,11 +21,11 @@ public class ScrapService {
         this.memberRepository = memberRepository;
     }
 
-    public List<ScrapResponseDto> findAllByMemberId(UUID memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
-        });
-
-        
-    }
+//    public List<ScrapResponseDto> findAllByMemberId(UUID memberId) {
+//        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+//            throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
+//        });
+//
+//
+//    }
 }
