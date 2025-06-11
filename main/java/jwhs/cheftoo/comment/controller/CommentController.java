@@ -26,7 +26,7 @@ public class CommentController {
     }
 
     @GetMapping("recipe/comment/{recipeId}")
-    public ResponseEntity<List<CommentResponseDto>> getAllCommentByRecipe(@PathVariable UUID recipeId) {
+    public ResponseEntity<List<CommentResponseDto>> getAllCommentByRecipe(@PathVariable("recipeId") UUID recipeId) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.findAllCommentByRecipe(recipeId));
     }
 

@@ -2,6 +2,7 @@ package jwhs.cheftoo.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jwhs.cheftoo.comment.entity.Comment;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Getter
 @Builder
+@AllArgsConstructor
 public class CommentResponseDto {
     private UUID commentId;
     private UUID recipeId;

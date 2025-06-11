@@ -23,7 +23,7 @@ import java.util.UUID;
 
 //레시피
 @RestController
-@RequestMapping("/recipes")
+@RequestMapping("/recipe")
 public class RecipeController {
 
     private RecipeService recipeService;
@@ -35,7 +35,7 @@ public class RecipeController {
     }
 
     @GetMapping("/{recipeId}")
-    public ResponseEntity<?> getRecipe(@PathVariable UUID recipeId) {
+    public ResponseEntity<?> getRecipe(@PathVariable("recipeId") UUID recipeId) {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
     }
 
@@ -76,14 +76,14 @@ public class RecipeController {
             @RequestPart("image") MultipartFile imageFile, // 대표 이미지
             @RequestPart("cookingStepImages") List<MultipartFile> stepImages, // 조리순서 이미지
             HttpServletRequest request,
-            @PathVariable UUID recipeId
+            @PathVariable("recipeId") UUID recipeId
     ) {
         return handleRecipeSave(dto, imageFile, stepImages, request, recipeId);
     }
 
     @DeleteMapping("/{recipeId}")
     public ResponseEntity<?> deleteRecipe(
-            @PathVariable UUID recipeId
+            @PathVariable("recipeId") UUID recipeId
     ) {
         try {
             recipeService.deleteRecipe(recipeId);

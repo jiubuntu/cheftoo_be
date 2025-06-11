@@ -1,6 +1,7 @@
 package jwhs.cheftoo.comment.service;
 
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Service
 public class CommentService {
 
+    private EntityManager entityManager;
     private RecipeRepository recipeRepository;
     private MemberRepository memberRepository;
     private CommentRepository commentRepository;
@@ -33,11 +35,13 @@ public class CommentService {
     public CommentService(
             RecipeRepository recipeRepository,
             MemberRepository memberRepository,
-            CommentRepository commentRepository
+            CommentRepository commentRepository,
+            EntityManager entityManager
     ) {
         this.recipeRepository = recipeRepository;
         this.memberRepository = memberRepository;
         this.commentRepository = commentRepository;
+        this.entityManager = entityManager;
     }
 
     //특정 레시피 모든 댓글 조회
@@ -76,6 +80,9 @@ public class CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
+        // dataCreated timeStamp 컬럼은 flush를 해야 DB에서 값을 넣기때문에, 수동 flush 후, DB데이터와 동기화
+        entityManager.flush();
+        entityManager.refresh(savedComment);
 
         return CommentResponseDto.fromEntity(savedComment, comment.getMember().getNickname());
     }
