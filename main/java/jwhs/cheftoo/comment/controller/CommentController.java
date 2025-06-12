@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.http.HttpRequest;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ public class CommentController {
     public ResponseEntity<?> deleteComment(
             @PathVariable UUID commentId,
             HttpServletRequest request
-    ) {
+    ) throws AccessDeniedException {
         String token = jwtUtil.getTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 

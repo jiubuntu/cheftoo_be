@@ -1,13 +1,15 @@
 package jwhs.cheftoo.scrap.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jwhs.cheftoo.scrap.dto.ScrapRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapResponseDto;
 import jwhs.cheftoo.scrap.service.ScrapService;
 import jwhs.cheftoo.util.JwtUtil;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,14 +24,55 @@ public class ScrapController {
         this.jwtUtil = jwtUtil;
     }
 
-//    @GetMapping("member/scrap")
-//    public List<ScrapResponseDto> getScrapByMember(
-//            HttpServletRequest request
-//    ) {
-//
-//        String token = jwtUtil.getTokenFromRequest(request);
-//        UUID memberId = jwtUtil.getMemberIdFromToken(token);
-//
-//        return scrapService.findAllByMemberId(memberId);
-//    }
+    @GetMapping("member/scrap")
+    public ResponseEntity<List<ScrapResponseDto>> getScrapByMember(
+            HttpServletRequest request
+    ) {
+
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(scrapService.findAllByMemberId(memberId));
+    }
+
+    @PostMapping("member/scrap")
+    public ResponseEntity<?> saveScrap(
+            @RequestBody ScrapRequestDto scrapRequestDto,
+            HttpServletRequest request
+    ) {
+
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        scrapService.saveScrap(scrapRequestDto, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PutMapping("member/scrap/{scrapId}")
+    public ResponseEntity<?> updateScrap(
+            @PathVariable("scrapId") UUID scrapId,
+            @RequestBody ScrapRequestDto scrapRequestDto,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        scrapService.saveScrap(scrapRequestDto, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("member/scrap/{scrapId}")
+    public ResponseEntity<?> deleteScrap(
+            @PathVariable("scrapId") UUID scrapId,
+            HttpServletRequest request
+    ) throws AccessDeniedException {
+        String token = jwtUtil.getTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        scrapService.deleteScrap(scrapId, memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

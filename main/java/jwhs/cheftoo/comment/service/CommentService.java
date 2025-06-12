@@ -20,6 +20,7 @@ import jwhs.cheftoo.recipe.repository.RecipeRepository;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -89,14 +90,14 @@ public class CommentService {
 
 
     @Transactional
-    public void deleteComment(UUID commentId, UUID memberId) {
+    public void deleteComment(UUID commentId, UUID memberId) throws AccessDeniedException {
         // 댓글을 작성한 멤버인지 확인
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> {
             throw new CommentNotFoundException("댓글을 찾을 수 없습니다.");
         });
 
         if (!comment.getMember().getMemberId().equals(memberId)) {
-            throw new CommentAccessDeniedException("로그인된 유저와 댓글 작성자가 일치하지 않습니다.");
+            throw new AccessDeniedException("로그인된 유저와 댓글 작성자가 일치하지 않습니다.");
         }
 
         commentRepository.deleteById(commentId);
