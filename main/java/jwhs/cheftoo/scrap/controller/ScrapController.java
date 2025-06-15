@@ -1,6 +1,7 @@
 package jwhs.cheftoo.scrap.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jwhs.cheftoo.scrap.dto.ScrapInsertRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapResponseDto;
 import jwhs.cheftoo.scrap.service.ScrapService;
@@ -37,14 +38,14 @@ public class ScrapController {
 
     @PostMapping("member/scrap")
     public ResponseEntity<?> saveScrap(
-            @RequestBody ScrapRequestDto scrapRequestDto,
+            @RequestBody ScrapInsertRequestDto scrapInsertRequestDto,
             HttpServletRequest request
     ) {
 
         String token = jwtUtil.getTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
-        scrapService.saveScrap(scrapRequestDto, memberId);
+        scrapService.saveScrap(scrapInsertRequestDto, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -58,7 +59,7 @@ public class ScrapController {
         String token = jwtUtil.getTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
-        scrapService.saveScrap(scrapRequestDto, memberId);
+        scrapService.updateScrap(scrapRequestDto, memberId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

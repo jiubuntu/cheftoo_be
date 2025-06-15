@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.auth.repository.MemberRepository;
+import jwhs.cheftoo.scrap.dto.ScrapInsertRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapResponseDto;
 import jwhs.cheftoo.scrap.entity.Scrap;
@@ -43,13 +44,30 @@ public class ScrapService {
     }
 
     @Transactional
-    public ScrapResponseDto saveScrap(ScrapRequestDto scrapRequestDto, UUID memberId) {
+    public ScrapResponseDto saveScrap(ScrapInsertRequestDto scrapRequestDto, UUID memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
         });
 
         Scrap scrap = Scrap.builder()
-                .scrapId(scrapRequestDto.getScrapId() != null ? scrapRequestDto.getScrapId() : null)
+                .scrapId(null)
+                .scrapName(scrapRequestDto.getScrapName())
+                .member(member)
+                .build();
+
+        Scrap savedScrap = scrapRepository.save(scrap);
+
+        return ScrapResponseDto.fromEntity(savedScrap);
+    }
+
+    @Transactional
+    public ScrapResponseDto updateScrap(ScrapRequestDto scrapRequestDto, UUID memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+            throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
+        });
+
+        Scrap scrap = Scrap.builder()
+                .scrapId(scrapRequestDto.getScrapId())
                 .scrapName(scrapRequestDto.getScrapName())
                 .member(member)
                 .build();
