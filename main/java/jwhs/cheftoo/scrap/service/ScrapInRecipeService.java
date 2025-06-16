@@ -1,9 +1,11 @@
 package jwhs.cheftoo.scrap.service;
 
+import jakarta.transaction.Transactional;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import jwhs.cheftoo.scrap.dto.ScrapInRecipeDeleteRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapInRecipeResponseDto;
 import jwhs.cheftoo.scrap.entity.Scrap;
 import jwhs.cheftoo.scrap.entity.ScrapInRecipe;
@@ -28,6 +30,7 @@ public class ScrapInRecipeService {
         this.recipeRepository = recipeRepository;
     }
 
+    @Transactional
     public void saveScrapInRecipe(UUID scrapId, UUID recipeId) {
 
         Scrap scrap  = scrapRepository.findById(scrapId).orElseThrow(() -> {
@@ -56,6 +59,14 @@ public class ScrapInRecipeService {
                 .scrapId(scrapId)
                 .recipeList(recipeList)
                 .build();
+    }
+
+    @Transactional
+    public void delete(ScrapInRecipeDeleteRequestDto dto) {
+        UUID scrapId = dto.getScrapId();
+        List<UUID> recipeIdList = dto.getRecipeIdList();
+
+        scrapInRecipeRepository.deleteByScrapIdAndRecipeId(scrapId, recipeIdList);
     }
 
 }

@@ -1,15 +1,13 @@
 package jwhs.cheftoo.scrap.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jwhs.cheftoo.scrap.dto.ScrapInRecipeDeleteRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapInRecipeResponseDto;
 import jwhs.cheftoo.scrap.service.ScrapInRecipeService;
 import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -45,4 +43,13 @@ public class ScrapInRecipeController {
         return ResponseEntity.status(HttpStatus.OK).body(resultDto);
     }
 
+
+    @DeleteMapping("member/scrap/recipe")
+    public ResponseEntity<?> deleteScrapInRecipe(
+            @RequestBody ScrapInRecipeDeleteRequestDto dto
+            ) {
+        scrapInRecipeService.delete(dto);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
