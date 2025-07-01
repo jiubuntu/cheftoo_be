@@ -30,7 +30,7 @@ public class ScrapController {
             HttpServletRequest request
     ) {
 
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         return ResponseEntity.status(HttpStatus.OK).body(scrapService.findAllByMemberId(memberId));
@@ -42,7 +42,7 @@ public class ScrapController {
             HttpServletRequest request
     ) {
 
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         scrapService.saveScrap(scrapInsertRequestDto, memberId);
@@ -56,7 +56,7 @@ public class ScrapController {
             @RequestBody ScrapRequestDto scrapRequestDto,
             HttpServletRequest request
     ) {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         scrapService.updateScrap(scrapRequestDto, memberId);
@@ -69,7 +69,7 @@ public class ScrapController {
             @PathVariable("scrapId") UUID scrapId,
             HttpServletRequest request
     ) throws AccessDeniedException {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         scrapService.deleteScrap(scrapId, memberId);

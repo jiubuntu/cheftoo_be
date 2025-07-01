@@ -1,11 +1,14 @@
 package jwhs.cheftoo.security;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jwhs.cheftoo.auth.service.RefreshTokenService;
 import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 // JWT 유효성 검증 필터
@@ -26,6 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Value("${kakao.redirect.url}")
     private String REDIRECT_URL;
     private final JwtUtil jwtUtil;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -41,29 +48,67 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return ;
         }
 
-        String token = jwtUtil.getTokenFromRequest(request);
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        String refreshToken = jwtUtil.getRefreshTokenFromRequest(request);
 
-        if(token == null) {
+        if(accessToken == null) {
             filterChain.doFilter(request, response);
             return ;
         }
 
-        //JWT 토큰이 유효하지 않으면 다시 로그인 화면으로 이동
-        if (!jwtUtil.validateToken(token)) {
-            response.sendRedirect(KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code");
+        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
+            UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+            setAuthentication(memberId);
+            filterChain.doFilter(request, response);
             return ;
         }
 
-        // 토큰이 유효하면 Authentication 객체 생성 후 세팅
-        UUID memberId = jwtUtil.getMemberIdFromToken(token);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null, Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
+            handleTokenReissue(refreshToken, response);
+            return ;
+        }
 
-
-        filterChain.doFilter(request, response);
+        redirectToLogin(response);
 
     }
 
+    // 인증 처리
+    public void setAuthentication(UUID memberId) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null, Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
+
+
+    public void handleTokenReissue(String refreshToken, HttpServletResponse response) throws IOException {
+        UUID memberId = jwtUtil.getMemberIdFromToken(refreshToken);
+        String savedRefreshToken = null;
+        try {
+            savedRefreshToken = refreshTokenService.getRefreshToken(memberId);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "로그인 실패 : 서버 오류");
+            return ;
+        }
+
+        if (Objects.equals(refreshToken, savedRefreshToken)) {
+            String newAccessToken = jwtUtil.generateAccessToken(memberId);
+            jwtUtil.sendAccessToken(response, newAccessToken);
+        } else { // 리프레시 토큰 삭제 후, 재로그인
+            try {
+                refreshTokenService.deleteRefreshToken(memberId);
+            } catch (Exception e) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "로그인 실패 : 서버 오류");
+                return ;
+            }
+
+            redirectToLogin(response);
+        }
+
+    }
+
+    public void redirectToLogin(HttpServletResponse response) throws IOException {
+        String kakaoLoginUrl = KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code";
+        response.sendRedirect(kakaoLoginUrl);
+    }
 
 }

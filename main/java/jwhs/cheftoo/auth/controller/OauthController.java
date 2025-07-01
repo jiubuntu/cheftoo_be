@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -53,7 +54,11 @@ public class OauthController {
         // 처음 로그인하는 사용자라면 -> 닉네임 설정 , 기존 유저라면 -> 그냥 로그인
         Map<String, Object> map = kakaoService.loginWithKakao(code);
 
-        jwtUtil.addJwtToCookie(response, (String) map.get("jwt")); // HttpOnly 방식으로 쿠키에 jwt담아 리턴
+        //리프레시 토큰 발급
+        jwtUtil.addRefreshTokenToCookie((UUID) map.get("memberId"), response, (String) map.get("refreshToken")); // HttpOnly 방식으로 쿠키에 jwt담아 리턴
+
+        // 액세스 토큰 발급
+        jwtUtil.sendAccessToken(response, (String) map.get("accessToken"));
 
         boolean isNewUser = (boolean) map.get("isNewUser");
         // 다음페이지값이 있으면 다음 페이지로 이동

@@ -39,8 +39,10 @@ public class KakaoService {
         Member member = optionalMember.orElseGet(() -> registerNewUser(kakaoUserId));
 
         Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("memberId", member.getMemberId());
         resultMap.put("isNewUser", isNewUser);
-        resultMap.put("jwt", jwtUtil.generateToken(member.getMemberId()));
+        resultMap.put("refreshToken", jwtUtil.generateRefreshToken(member.getMemberId()));
+        resultMap.put("accessToken", jwtUtil.generateAccessToken(member.getMemberId()));
 
         return resultMap;
     }

@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpRequest;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public class CommentController {
             @RequestBody CommentRequestDto dto,
             @PathVariable("recipeId") UUID recipeId
     ) {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         return ResponseEntity.status(HttpStatus.OK).body(commentService.createComment(dto, memberId, recipeId));
@@ -50,7 +49,7 @@ public class CommentController {
             @PathVariable UUID commentId,
             HttpServletRequest request
     ) throws AccessDeniedException {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         commentService.deleteComment(commentId, memberId);

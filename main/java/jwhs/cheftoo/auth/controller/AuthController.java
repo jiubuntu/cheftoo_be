@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +36,7 @@ public class AuthController {
             @RequestParam("nickname") String nickname,
             HttpServletRequest request
     ) {
-       String token = jwtUtil.getTokenFromRequest(request);
+       String token = jwtUtil.getAccessTokenFromRequest(request);
        UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
        memberService.updateNickname(memberId, nickname);
@@ -49,7 +48,7 @@ public class AuthController {
     // 멤버ID를 통해 닉네임 조회
     @GetMapping("/nickname")
     public ResponseEntity<?> getNickNameByMember(HttpServletRequest request) {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberService.findNickNameByMemberId(memberId));

@@ -1,21 +1,15 @@
 package jwhs.cheftoo.recipe.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
-import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
-import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +35,7 @@ public class RecipeController {
 
     @GetMapping("/member")
     public ResponseEntity<?> getAllRecipeByMember( HttpServletRequest request) {
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipesByMember(memberId)) ;
@@ -104,7 +98,7 @@ public class RecipeController {
 
     ) {
         // JWT의 Payload에서 memberId 추출
-        String token = jwtUtil.getTokenFromRequest(request);
+        String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
         UUID savedRecipeId = null;
 
