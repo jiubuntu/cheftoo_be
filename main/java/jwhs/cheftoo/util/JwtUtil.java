@@ -109,17 +109,17 @@ public class JwtUtil {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "로그인 실패 : 서버 오류");
         }
 
-        Cookie setCookie = setRefreshTokenInCookie(token);
+        Cookie setCookie = setRefreshTokenInCookie(token, refreshTokenExpirationTime);
 
         response.addCookie(setCookie); // 클라이언트에 쿠키 저장
     }
 
-    public Cookie setRefreshTokenInCookie(String token) {
+    public Cookie setRefreshTokenInCookie(String token, long maxAgeMilSec) {
         Cookie cookie = new Cookie("refreshToken", token);
         cookie.setHttpOnly(true);
 //        cookie.setSecure(true); // https에서만 전송
         cookie.setPath("/");
-        cookie.setMaxAge((int) (refreshTokenExpirationTime / 1000));
+        cookie.setMaxAge((int) (maxAgeMilSec / 1000));
         return cookie;
     }
 

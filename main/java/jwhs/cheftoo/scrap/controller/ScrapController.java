@@ -37,7 +37,7 @@ public class ScrapController {
     }
 
     @PostMapping("member/scrap")
-    public ResponseEntity<?> saveScrap(
+    public ResponseEntity<ScrapResponseDto> saveScrap(
             @RequestBody ScrapInsertRequestDto scrapInsertRequestDto,
             HttpServletRequest request
     ) {
@@ -45,10 +45,11 @@ public class ScrapController {
         String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
-        scrapService.saveScrap(scrapInsertRequestDto, memberId);
+        ScrapResponseDto savedScrap =  scrapService.saveScrap(scrapInsertRequestDto, memberId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body(savedScrap);
     }
+
 
     @PutMapping("member/scrap/{scrapId}")
     public ResponseEntity<?> updateScrap(
