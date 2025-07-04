@@ -3,8 +3,13 @@ package jwhs.cheftoo.recipe.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
+import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +47,12 @@ public class RecipeController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllRecipe() {
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes());
+    public ResponseEntity<Page<RecipeResponseDto>> getAllRecipe(
+            @PageableDefault(size = 10, sort = "dataCreated", direction = Sort.Direction.DESC)
+            Pageable pageable
+            )
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes(pageable));
     }
 
     @PostMapping

@@ -14,6 +14,8 @@ import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -96,15 +98,8 @@ public class RecipeService {
 
 
     // 전체조회
-    public List<RecipeResponseDto> findAllRecipes() {
-        List<Recipe> recipeList = recipeRepository.findAll();
-
-        return recipeList.stream()
-                .map(recipe -> {
-                    String imgPath = imageService.findMainImageByRecipeId(recipe).getImgPath();
-                    return RecipeResponseDto.fromEntity(recipe, imgPath);
-                })
-                .collect(Collectors.toList());
+    public Page<RecipeResponseDto> findAllRecipes(Pageable pageable) {
+        return recipeRepository.findAllWithImage(pageable);
     }
 
 
