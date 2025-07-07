@@ -8,6 +8,7 @@ import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
 import jwhs.cheftoo.image.repository.ImageRepository;
 import jwhs.cheftoo.recipe.entity.Recipe;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Service
+@Slf4j
 public class ImageService {
 
     @Value("${image.main-image.path}")
@@ -36,12 +38,20 @@ public class ImageService {
     @Value("${image.cookingorder-image.path}")
     String cookingOrderImagePath;
 
+
     private ImageRepository imageRepository;
     private CookingOrderRepository cookingOrderRepository;
 
-    public ImageService(ImageRepository imageRepository, CookingOrderRepository cookingOrderRepository) {
+    private S3Service s3Service;
+
+    public ImageService(
+            ImageRepository imageRepository,
+            CookingOrderRepository cookingOrderRepository,
+            S3Service s3Service
+    ) {
         this.imageRepository = imageRepository;
         this.cookingOrderRepository = cookingOrderRepository;
+        this.s3Service = s3Service;
     }
 
     // 트랜잭션 커밋 후 조리순서 이미지 저장하는 작업 저장
@@ -103,50 +113,55 @@ public class ImageService {
 
 
     // 대표 이미지 저장
-    public UUID saveMainImageMetaAndFile(MultipartFile file, Member member, Recipe recipe) {
+    public UUID saveMainImageMetaAndFile(MultipartFile file, Member member, Recipe recipe)  {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String dirPath = mainImagePath + "/" + today + "/";
-        String path = dirPath + fileName;
+        String key = dirPath + fileName;
 
+        // s3에 이미지 파일 저장
+        try {
+            s3Service.uploadRecipeImage(key, file);
+        } catch (IOException e) {
+            log.error("s3 레시피 이미지 업로드 실패" , e);
+            throw new RuntimeException("이미지 업로드 실패");
+        }
 
         //이미지 테이블에 이미지 메타데이터 저장
         Images saved = imageRepository.save(
                 Images.builder()
                         .recipe(recipe)
                         .member(member)
-                        .imgPath(path)
+                        .imgPath(key)
                         .build());
 
-        // 트랜잭션 커밋 후, 메인 이미지 파일 저장
-        registerMainImageFileSaveTask(() -> {
-            checkAndMakeDir(dirPath);
-            File dest = new File(path);
-            try {
-                file.transferTo(dest);
-            } catch (IOException e) {
-                throw new RuntimeException("이미지 저장 실패", e);
-            }
-        });
+
 
         return saved.getImageId();
 
     }
 
     // 레시피의 조리순서에 존재하는 이미지 저장
-    public void saveCookingOrderImageMetaAndFile(CookingOrderRequestSaveDto step, MultipartFile stepImage, Recipe recipe, int idx)  {
+    public void saveCookingOrderImageMetaAndFile(CookingOrderRequestSaveDto step, MultipartFile stepImage, Recipe recipe, int idx) throws IOException {
         // 이미지의 메타 데이터 저장
         String fileName = UUID.randomUUID() + "_" + stepImage.getOriginalFilename();
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String dirPath = cookingOrderImagePath + "/" + today + "/";
-        String path = dirPath + fileName;
+        String key = dirPath + fileName;
+
+        try {
+            s3Service.uploadCookingOrderImage(key, stepImage);
+        } catch (IOException e) {
+            log.error("s3 조리순서 이미지 업로드 실패" , e);
+            throw new RuntimeException("이미지 업로드 실패");
+        }
 
         cookingOrderRepository.save(
                 CookingOrder.builder()
                         .recipe(recipe)
                         .order(idx)
                         .content(step.getContent())
-                        .imgPath(path)
+                        .imgPath(key)
                         .build()
         );
 
@@ -154,7 +169,7 @@ public class ImageService {
         // 트랜잭션 커밋 후, 이미지 저장
         addDeferredImageSave(() -> {
             checkAndMakeDir(dirPath);
-            File dest = new File(path);
+            File dest = new File(key);
             try {
                 stepImage.transferTo(dest);
             } catch (IOException e) {

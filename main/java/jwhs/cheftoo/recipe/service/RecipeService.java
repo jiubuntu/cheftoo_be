@@ -5,6 +5,7 @@ import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
 import jwhs.cheftoo.image.service.ImageService;
+import jwhs.cheftoo.image.service.S3Service;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
@@ -59,6 +60,7 @@ public class RecipeService {
         // 레시피 조회
         Recipe recipe = recipeRepository.findByRecipeId(recipeId)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 레시피를 찾을 수 없습니다."));
+
         // 대표 이미지 조회
         RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipeId(recipe));
 
@@ -121,7 +123,7 @@ public class RecipeService {
 
             return recipe;
         } catch ( Exception e) {
-            throw new RecipeCreateException("레시피 저장 중 에러 발생");
+            throw new RecipeCreateException("레시피 저장 중 에러가 발생했습니다.");
         }
     }
 
@@ -162,7 +164,7 @@ public class RecipeService {
 
     }
 
-    private UUID saveMainImage(MultipartFile imageFile, Member member, Recipe recipe) throws IOException {
+    private UUID saveMainImage(MultipartFile imageFile, Member member, Recipe recipe) {
         if (imageFile != null && !imageFile.isEmpty()) {
 //            return imageService.updateMainImage(imageFile, memberId, recipeId);
             return imageService.saveMainImageMetaAndFile(imageFile, member, recipe);
@@ -195,7 +197,7 @@ public class RecipeService {
     }
 
 
-    private void saveCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, Recipe recipe) {
+    private void saveCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, Recipe recipe) throws IOException {
         List<CookingOrderRequestSaveDto> steps = recipeRequestDto.getCookingOrders();
 
         if (steps.isEmpty() && steps == null) return ;
