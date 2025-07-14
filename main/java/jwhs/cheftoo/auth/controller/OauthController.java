@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class OauthController {
 
     // 카카오 로그인
     @GetMapping("/kakao/callback")
-    public void loginKakao(
+    public ResponseEntity<?> loginKakao(
             @RequestParam("code") String code,
             @RequestParam(value = "state") String state,
             HttpServletResponse response
@@ -54,18 +55,24 @@ public class OauthController {
         // 처음 로그인하는 사용자라면 -> 닉네임 설정 , 기존 유저라면 -> 그냥 로그인
         Map<String, Object> map = kakaoService.loginWithKakao(code);
 
-        //리프레시 토큰 발급
+        String refreshToken = (String) map.get("refreshToken");
+        String accessToken = (String) map.get("accessToken");
+        boolean isNewUser = (boolean) map.get("isNewUser");
+
+        //리프레시 토큰 발급 (Http Only)
         jwtUtil.addRefreshTokenToCookie((UUID) map.get("memberId"), response, (String) map.get("refreshToken")); // HttpOnly 방식으로 쿠키에 jwt담아 리턴
 
-        // 액세스 토큰 발급
-        jwtUtil.sendAccessToken(response, (String) map.get("accessToken"));
-
-        boolean isNewUser = (boolean) map.get("isNewUser");
         // 다음페이지값이 있으면 다음 페이지로 이동
         // 다음페이지 값이 있는 경우 : 레시피 화면(prevPage) -> 레시피 등록 화면(nextPage)
         String targetUrl = isNewUser ? "nickname" : (nextPage != null ? nextPage : prevPage);
+//        response.sendRedirect("http://localhost:3000" + targetUrl + "?isNewUser=" + isNewUser);
 
-        response.sendRedirect("http://localhost:3000" + targetUrl + "?isNewUser=" + isNewUser);
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("accessToken", accessToken);
+        responseBody.put("isNewUser", isNewUser);
+        responseBody.put("redirectTo", targetUrl);
+
+        return ResponseEntity.ok(responseBody);
 
     }
 

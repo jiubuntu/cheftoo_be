@@ -57,19 +57,11 @@ public class RecipeController {
 
     @PostMapping
     public ResponseEntity<?> createRecipe(
-            @RequestPart("data") MultipartFile jsonFile,
-            @RequestPart("image") MultipartFile imageFile, // 대표 이미지
-            @RequestPart("cookingStepImages") List<MultipartFile> stepImages, // 조리순서 이미지
+            @RequestBody RecipeRequestDto dto,
             HttpServletRequest request
     ) {
-        RecipeRequestDto dto;
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            dto = mapper.readValue(jsonFile.getInputStream(), RecipeRequestDto.class);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body("JSON 파싱 실패");
-        }
-        return handleRecipeSave(dto, imageFile, stepImages, request, null);
+
+        return handleRecipeSave(dto, request, null);
     }
 
 
@@ -81,7 +73,7 @@ public class RecipeController {
             HttpServletRequest request,
             @PathVariable("recipeId") UUID recipeId
     ) {
-        return handleRecipeSave(dto, imageFile, stepImages, request, recipeId);
+        return handleRecipeSave(dto, request, recipeId);
     }
 
     @DeleteMapping("/{recipeId}")
@@ -100,8 +92,6 @@ public class RecipeController {
 
     private ResponseEntity<?> handleRecipeSave(
             RecipeRequestDto dto,
-            MultipartFile imageFile,
-            List<MultipartFile> stepImages,
             HttpServletRequest request,
             UUID recipeId
 
@@ -112,7 +102,7 @@ public class RecipeController {
         UUID savedRecipeId = null;
 
         if (recipeId == null) { // INSESRT
-            savedRecipeId = recipeService.createRecipe(dto, memberId, imageFile, stepImages).getRecipeId();
+            savedRecipeId = recipeService.createRecipe(dto, memberId).getRecipeId();
         } else { // UPDATE
             try {
 //                savedRecipeId = recipeService.updateRecipe(dto, memberId, imageFile, stepImages, recipeId);

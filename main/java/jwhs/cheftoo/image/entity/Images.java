@@ -45,6 +45,9 @@ public class Images {
     @Column(name="imgPath", length = 255)
     private String imgPath;
 
+    @Column(name="contentType")
+    private String contentType;
+
     @CreationTimestamp
     @Column(name="DataCreated")
     private LocalDateTime dataCreated;

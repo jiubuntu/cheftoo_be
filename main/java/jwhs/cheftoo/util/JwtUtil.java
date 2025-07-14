@@ -108,7 +108,6 @@ public class JwtUtil {
         } catch (IllegalStateException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "로그인 실패 : 서버 오류");
         }
-
         Cookie setCookie = setRefreshTokenInCookie(token, refreshTokenExpirationTime);
 
         response.addCookie(setCookie); // 클라이언트에 쿠키 저장

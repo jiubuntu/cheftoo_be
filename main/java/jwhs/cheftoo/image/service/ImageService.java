@@ -32,11 +32,11 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class ImageService {
 
-    @Value("${image.main-image.path}")
-    String mainImagePath;
+    @Value("${cloud.aws.s3.recipe.image.bucket}")
+    private String recipeImageBucket;
 
-    @Value("${image.cookingorder-image.path}")
-    String cookingOrderImagePath;
+    @Value("${cloud.aws.s3.cookingorder.image.bucket}")
+    private String cookingOrderImageBucket;
 
 
     private ImageRepository imageRepository;
@@ -112,72 +112,75 @@ public class ImageService {
     }
 
 
-    // 대표 이미지 저장
-    public UUID saveMainImageMetaAndFile(MultipartFile file, Member member, Recipe recipe)  {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String dirPath = mainImagePath + "/" + today + "/";
-        String key = dirPath + fileName;
+//    // 대표 이미지 저장
+//    public UUID saveMainImageMetaAndFile(MultipartFile file, Member member, Recipe recipe)  {
+//        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+//        String dirPath = recipeImagePath + "/" + today + "/";
+//        String key = dirPath + fileName;
+//
+//        // s3에 이미지 파일 저장
+//        try {
+//            s3Service.uploadImage(key, file);
+//        } catch (IOException e) {
+//            log.error("s3 레시피 이미지 업로드 실패" , e);
+//            throw new RuntimeException("이미지 업로드 실패");
+//        }
+//
+//        //이미지 테이블에 이미지 메타데이터 저장
+//        Images saved = imageRepository.save(
+//                Images.builder()
+//                        .recipe(recipe)
+//                        .member(member)
+//                        .imgPath(key)
+//                        .build());
+//
+//
+//
+//        return saved.getImageId();
+//
+//    }
 
-        // s3에 이미지 파일 저장
-        try {
-            s3Service.uploadRecipeImage(key, file);
-        } catch (IOException e) {
-            log.error("s3 레시피 이미지 업로드 실패" , e);
-            throw new RuntimeException("이미지 업로드 실패");
-        }
-
-        //이미지 테이블에 이미지 메타데이터 저장
-        Images saved = imageRepository.save(
-                Images.builder()
-                        .recipe(recipe)
-                        .member(member)
-                        .imgPath(key)
-                        .build());
 
 
-
-        return saved.getImageId();
-
-    }
 
     // 레시피의 조리순서에 존재하는 이미지 저장
-    public void saveCookingOrderImageMetaAndFile(CookingOrderRequestSaveDto step, MultipartFile stepImage, Recipe recipe, int idx) throws IOException {
-        // 이미지의 메타 데이터 저장
-        String fileName = UUID.randomUUID() + "_" + stepImage.getOriginalFilename();
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String dirPath = cookingOrderImagePath + "/" + today + "/";
-        String key = dirPath + fileName;
-
-        try {
-            s3Service.uploadCookingOrderImage(key, stepImage);
-        } catch (IOException e) {
-            log.error("s3 조리순서 이미지 업로드 실패" , e);
-            throw new RuntimeException("이미지 업로드 실패");
-        }
-
-        cookingOrderRepository.save(
-                CookingOrder.builder()
-                        .recipe(recipe)
-                        .order(idx)
-                        .content(step.getContent())
-                        .imgPath(key)
-                        .build()
-        );
-
-
-        // 트랜잭션 커밋 후, 이미지 저장
-        addDeferredImageSave(() -> {
-            checkAndMakeDir(dirPath);
-            File dest = new File(key);
-            try {
-                stepImage.transferTo(dest);
-            } catch (IOException e) {
-                throw new RuntimeException("조리순서 이미지 저장 실패", e);
-            }
-        });
-
-    }
+//    public void saveCookingOrderImageMetaAndFile(CookingOrderRequestSaveDto step, MultipartFile stepImage, Recipe recipe, int idx) throws IOException {
+//        // 이미지의 메타 데이터 저장
+//        String fileName = UUID.randomUUID() + "_" + stepImage.getOriginalFilename();
+//        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+//        String dirPath = cookingOrderImagePath + "/" + today + "/";
+//        String key = dirPath + fileName;
+//
+//        try {
+//            s3Service.uploadCookingOrderImage(key, stepImage);
+//        } catch (IOException e) {
+//            log.error("s3 조리순서 이미지 업로드 실패" , e);
+//            throw new RuntimeException("이미지 업로드 실패");
+//        }
+//
+//        cookingOrderRepository.save(
+//                CookingOrder.builder()
+//                        .recipe(recipe)
+//                        .order(idx)
+//                        .content(step.getContent())
+//                        .imgPath(key)
+//                        .build()
+//        );
+//
+//
+//        // 트랜잭션 커밋 후, 이미지 저장
+//        addDeferredImageSave(() -> {
+//            checkAndMakeDir(dirPath);
+//            File dest = new File(key);
+//            try {
+//                stepImage.transferTo(dest);
+//            } catch (IOException e) {
+//                throw new RuntimeException("조리순서 이미지 저장 실패", e);
+//            }
+//        });
+//
+//    }
 
 
 
@@ -230,7 +233,6 @@ public class ImageService {
         imageRepository.deleteByRecipe(recipe);
 
     }
-
 
 
 

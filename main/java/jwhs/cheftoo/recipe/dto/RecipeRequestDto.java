@@ -16,10 +16,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RecipeRequestDto {
     private String recipeTitle;
     private String recipeContent;
     private List<IngredientsRequestSaveDto> ingredients; // 재료
-    private List<CookingOrderRequestSaveDto> cookingOrders; // 요리 순서
+    private List<CookingOrderRequestSaveDto> cookingOrder; // 요리 순서
+    private String recipeImageKey; // 레시피 이미지 객체 KEY
+    private String recipeImageContentType; // 레시피 이미지 파일형식
 }

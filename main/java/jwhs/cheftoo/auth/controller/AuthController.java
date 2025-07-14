@@ -97,8 +97,10 @@ public class AuthController {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "로그인 실패 : 서버 오류");
                 return ;
             }
-            String kakaoLoginUrl = KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code";
-            response.sendRedirect(kakaoLoginUrl);
+
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 실패 : 리프레시 토큰 불일치");
+//            String kakaoLoginUrl = KAKAO_LOGIN_URL + "?client_id="+ KAKAO_CLIENT_ID + "&redirect_uri=" + REDIRECT_URL + "&response_type=code";
+//            response.sendRedirect(kakaoLoginUrl);
         }
     }
 

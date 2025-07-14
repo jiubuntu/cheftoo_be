@@ -1,5 +1,6 @@
 package jwhs.cheftoo.image.service;
 
+import jwhs.cheftoo.image.enums.S3ImageType;
 import jwhs.cheftoo.image.exception.ImageSaveException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,52 +20,18 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class S3Service {
-
-    private final S3Client s3Client;
-    private final S3Presigner s3Presigner;
     @Value("${cloud.aws.s3.recipe.image.bucket}")
     private String recipeImageBucket;
 
     @Value("${cloud.aws.s3.cookingorder.image.bucket}")
     private String cookingOrderImageBucket;
 
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
-    public String uploadRecipeImage(String key, MultipartFile file) throws ImageSaveException, IOException {
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(recipeImageBucket)
-                .key(key)
-                .contentType(file.getContentType())
-                .build();
-
-        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-        return key;
-    }
-
-    public String suploadCookingOrderImage(String key, MultipartFile file) throws IOException {
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(cookingOrderImageBucket)
-                .key(key)
-                .contentType(file.getContentType())
-                .build();
-
-        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-        return key;
-    }
-
-
-
-    public void deleteRecipeImage(String key) {
+    public void deleteImage(String key, String bucket) {
         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-                .bucket(recipeImageBucket)
-                .key(key)
-                .build();
-        s3Client.deleteObject(deleteRequest);
-    }
-
-
-    public void deleteCookingOrderImage(String key) {
-        DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-                .bucket(cookingOrderImageBucket)
+                .bucket(bucket)
                 .key(key)
                 .build();
         s3Client.deleteObject(deleteRequest);
@@ -72,7 +39,7 @@ public class S3Service {
 
 
     // 레시피 이미지 존재 여부 확인
-    public boolean doesRecipeImageExist(String key) {
+    public boolean doesImageExist(String key) {
         try {
             HeadObjectRequest request = HeadObjectRequest.builder()
                     .bucket(recipeImageBucket)
@@ -85,25 +52,11 @@ public class S3Service {
         }
     }
 
-    // 조리순서 이미지 존재 여부 확인
-    public boolean doesCookingOrderImageExist(String key) {
-        try {
-            HeadObjectRequest request = HeadObjectRequest.builder()
-                    .bucket(cookingOrderImageBucket)
-                    .key(key)
-                    .build();
-            s3Client.headObject(request);
-            return true;
-        } catch (S3Exception e) {
-            return false;
-        }
-    }
 
-
-    // recipe image presigned URL 발급 (GET)
-    public URL generateRecipeImagePresignedGetUrl(String key, Duration duration) {
+    // presigned URL 발급 (GET)
+    public URL generateImagePresignedGetUrl(String bucket, String key, Duration duration) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
-                .bucket(recipeImageBucket)
+                .bucket(bucket)
                 .key(key)
                 .build();
 
@@ -115,26 +68,12 @@ public class S3Service {
         return s3Presigner.presignGetObject(presignRequest).url();
     }
 
-    // cooking order image presigned URL 발급 (GET)
-    public URL generateCookingOrderImagePresignedGetUrl(String key, Duration duration) {
-        GetObjectRequest getRequest = GetObjectRequest.builder()
-                .bucket(cookingOrderImageBucket)
-                .key(key)
-                .build();
-
-        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(duration)
-                .getObjectRequest(getRequest)
-                .build();
-
-        return s3Presigner.presignGetObject(presignRequest).url();
-    }
     // presigned URL 발급 (PUT)
-    public URL generateRecipeImagePresignedPutUrl(String key, Duration duration) {
+    public URL generateImagePresignedPutUrl(String bucket, String key, String contentType, Duration duration) {
         PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(recipeImageBucket)
+                .bucket(bucket)
                 .key(key)
-                .contentType("image/jpeg")
+                .contentType(contentType)
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -145,19 +84,28 @@ public class S3Service {
         return s3Presigner.presignPutObject(presignRequest).url();
     }
 
-    // presigned URL 발급 (PUT)
-    public URL generateCookingOrderImagePresignedPutUrl(String key, Duration duration) {
-        PutObjectRequest putRequest = PutObjectRequest.builder()
-                .bucket(cookingOrderImageBucket)
-                .key(key)
-                .contentType("image/jpeg")
-                .build();
-
-        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(duration)
-                .putObjectRequest(putRequest)
-                .build();
-
-        return s3Presigner.presignPutObject(presignRequest).url();
+    public URL generateRecipeImagePresignedPutUrl(String key, String contentType, S3ImageType s3ImageType) {
+        return generateImagePresignedPutUrl(recipeImageBucket, key, contentType, s3ImageType.getDuration());
     }
+
+    public URL generateCookingOrderImagePresignedPutUrl(String key, String contentType, S3ImageType s3ImageType) {
+        return generateImagePresignedPutUrl(cookingOrderImageBucket, key, contentType, s3ImageType.getDuration());
+    }
+
+    public URL generateRecipeImagePresignedGetUrl(String key, S3ImageType s3ImageType) {
+        return generateImagePresignedGetUrl(recipeImageBucket, key, s3ImageType.getDuration());
+    }
+
+    public URL generateCookingOrderImagePresignedGetUrl(String key, S3ImageType s3ImageType) {
+        return generateImagePresignedGetUrl(cookingOrderImageBucket, key, s3ImageType.getDuration());
+    }
+
+    public void deleteRecipeImage(String key) {
+        deleteImage(key, recipeImageBucket);
+    }
+
+    public void deleteCookingOrderImage(String key) {
+        deleteImage(key, cookingOrderImageBucket);
+    }
+
 }

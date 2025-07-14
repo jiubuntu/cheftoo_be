@@ -77,4 +77,5 @@ public class ScrapController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
 }

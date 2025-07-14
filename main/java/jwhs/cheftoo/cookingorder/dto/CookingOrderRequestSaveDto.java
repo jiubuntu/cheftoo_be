@@ -9,7 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class CookingOrderRequestSaveDto {
+    private long order;
     private String content;
+    private String cookingOrderImageKey;
 }

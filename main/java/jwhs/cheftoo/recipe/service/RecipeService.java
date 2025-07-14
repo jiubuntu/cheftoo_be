@@ -4,17 +4,24 @@ import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
+import jwhs.cheftoo.cookingorder.entity.CookingOrder;
+import jwhs.cheftoo.image.entity.Images;
+import jwhs.cheftoo.image.enums.S3ImageType;
+import jwhs.cheftoo.image.repository.ImageRepository;
 import jwhs.cheftoo.image.service.ImageService;
 import jwhs.cheftoo.image.service.S3Service;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
+import jwhs.cheftoo.recipe.dto.RecipeWithImageDto;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -30,39 +39,32 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class RecipeService {
 
-    private RecipeRepository recipeRepository;
-    private IngredientsRepository ingredientsRepository;
-    private CookingOrderRepository cookingOrderRepository;
-    private ImageService imageService;
-
-    private MemberService memberService;
-
-    public RecipeService(
-            RecipeRepository recipeRepository,
-            IngredientsRepository ingredientsRepository,
-            CookingOrderRepository cookingOrderRepository,
-            ImageService imageService,
-            MemberService memberService
-    ) {
-        this.recipeRepository = recipeRepository;
-        this.ingredientsRepository = ingredientsRepository;
-        this.cookingOrderRepository = cookingOrderRepository;
-        this.imageService = imageService;
-        this.memberService = memberService;
-    }
-
+    private final RecipeRepository recipeRepository;
+    private final IngredientsRepository ingredientsRepository;
+    private final CookingOrderRepository cookingOrderRepository;
+    private final ImageService imageService;
+    private final MemberService memberService;
+    private final ImageRepository imageRepository;
+    private final S3Service s3Service;
+    private final RecipeViewService recipeViewService;
 
     // 단건조회(상세조회)
     @Transactional
     public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId) {
+
         // 레시피 조회
         Recipe recipe = recipeRepository.findByRecipeId(recipeId)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 레시피를 찾을 수 없습니다."));
 
         // 대표 이미지 조회
         RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipeId(recipe));
+        String key = images.getImgPath();
+        URL recipeImagePresignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+
 
         // 재료 조회
         List<Ingredients> ingredientsList = ingredientsRepository.findAllByRecipe(recipe);
@@ -72,7 +74,18 @@ public class RecipeService {
 
 
         // 조리순서 조회
-        List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderRepository.findByRecipeOrderByOrderDesc(recipe));
+        List<CookingOrder> cookingOrderList = cookingOrderRepository.findByRecipeOrderByOrderDesc(recipe).stream()
+                .map(step -> {
+                    String objkey = step.getImgPath();
+                    URL prisignedGetUrl = s3Service.generateCookingOrderImagePresignedGetUrl(objkey, S3ImageType.COOKING_ORDER_GET_DURATION);
+                    step.setImgPath(prisignedGetUrl.toString());
+                    return step;
+                })
+                .toList();
+        List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderList);
+
+        // 조회수 증가
+        recipeViewService.incrementRecipeView(recipeId);
 
         return RecipeDetailResponseDto.builder()
                 .recipeId(recipe.getRecipeId())
@@ -83,6 +96,7 @@ public class RecipeService {
                 .ingredients(ingredients)
                 .cookingOrder(cookingOrder)
                 .build();
+
     }
 
 
@@ -106,20 +120,21 @@ public class RecipeService {
 
 
     @Transactional
-    public Recipe createRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages) {
+    public Recipe createRecipe(RecipeRequestDto recipeRequestDto, UUID memberId) {
         try {
             Member member = memberService.findMemberById(memberId);
-            // 1. 레시피 저장
+
+            // 1. 레시피 메타데이터 저장
             Recipe recipe =  saveRecipe(null, member, recipeRequestDto);
 
-            // 2. 대표 이미지 저장
-            saveMainImage(imageFile, member, recipe);
+            // 2. 대표 이미지 메타데이터 저장
+            saveRecipeImage(member, recipe, recipeRequestDto);
 
             // 3. 재료 저장
             saveIngredienets(recipeRequestDto, recipe);
 
-            // 4. 조리순서 저장
-            saveCookingOrders(recipeRequestDto, stepImages, recipe);
+            // 4. 조리순서 이미지 메타데이터 저장
+            saveCookingOrders(recipeRequestDto, recipe, member);
 
             return recipe;
         } catch ( Exception e) {
@@ -136,7 +151,7 @@ public class RecipeService {
             Recipe recipe = saveRecipe(recipeId, member, recipeRequestDto);
 
             // 2. 대표 이미지 업데이트
-            saveMainImage(imageFile, member, recipe);
+            saveRecipeImage(member, recipe, recipeRequestDto);
 
             // 3. 재료 저장
             saveIngredienets(recipeRequestDto, recipe);
@@ -164,13 +179,18 @@ public class RecipeService {
 
     }
 
-    private UUID saveMainImage(MultipartFile imageFile, Member member, Recipe recipe) {
-        if (imageFile != null && !imageFile.isEmpty()) {
-//            return imageService.updateMainImage(imageFile, memberId, recipeId);
-            return imageService.saveMainImageMetaAndFile(imageFile, member, recipe);
-        } else {
-            return null;
-        }
+
+    private UUID saveRecipeImage(Member member, Recipe recipe, RecipeRequestDto recipeRequestDto) {
+        return imageRepository.save(
+                Images.builder()
+                        .imageId(null)
+                        .recipe(recipe)
+                        .member(member)
+                        .imgPath(recipeRequestDto.getRecipeImageKey())
+                        .contentType(recipeRequestDto.getRecipeImageContentType())
+                        .build()
+        ).getImageId();
+
     }
 
 //    private UUID updateMainImage(MultipartFile imageFile, Member member, Recipe recipe) {
@@ -197,22 +217,23 @@ public class RecipeService {
     }
 
 
-    private void saveCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, Recipe recipe) throws IOException {
-        List<CookingOrderRequestSaveDto> steps = recipeRequestDto.getCookingOrders();
+    private void saveCookingOrders(RecipeRequestDto recipeRequestDto, Recipe recipe, Member member) throws IOException {
+        List<CookingOrderRequestSaveDto> steps = recipeRequestDto.getCookingOrder();
 
         if (steps.isEmpty() && steps == null) return ;
 
-        int idx = 1;
+        List<CookingOrder> cookingOrderForSave = steps.stream()
+                .map( step -> {
+                            return CookingOrder.builder()
+                                    .order(step.getOrder())
+                                    .content(step.getContent())
+                                    .imgPath(step.getCookingOrderImageKey())
+                                    .build();
+                        }
 
-        for (int i = 0; i < steps.size(); i++) {
-            MultipartFile stepImage =  stepImages.get(i);
-            CookingOrderRequestSaveDto step = steps.get(i);
-            imageService.saveCookingOrderImageMetaAndFile(step, stepImage, recipe, idx);
-            idx ++;
-        }
+                ).toList();
 
-        imageService.registerCookingOrderImageFileSaveTask();
-
+        cookingOrderRepository.saveAll(cookingOrderForSave);
     }
 
 //    private void updateCookingOrders(RecipeRequestDto recipeRequestDto, List<MultipartFile> stepImages, UUID recipeId) {
