@@ -53,7 +53,6 @@ public class RecipeService {
     private final RecipeViewService recipeViewService;
 
     // 단건조회(상세조회)
-    @Transactional
     public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId) {
 
         // 레시피 조회

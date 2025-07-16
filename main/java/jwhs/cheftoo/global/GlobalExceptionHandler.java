@@ -4,6 +4,7 @@ import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
+import jwhs.cheftoo.recipe.exception.RecipeFindException;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import jwhs.cheftoo.scrap.exception.ScrapNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -96,6 +97,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(error);
+    }
+
+    @ExceptionHandler(RecipeFindException.class)
+    public ResponseEntity<Map<String, String>> handleRecipeFindException(RecipeFindException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "RecipeFindException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
 

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.service.RecipeService;
+import jwhs.cheftoo.recipe.service.RecipeViewService;
 import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,11 +27,17 @@ import java.util.UUID;
 public class RecipeController {
 
     private RecipeService recipeService;
+    private RecipeViewService recipeViewService;
     private JwtUtil jwtUtil;
 
-    public RecipeController(RecipeService recipeService, JwtUtil jwtUtil) {
+    public RecipeController(
+            RecipeService recipeService,
+            JwtUtil jwtUtil,
+            RecipeViewService recipeViewService
+    ) {
         this.recipeService = recipeService;
         this.jwtUtil = jwtUtil;
+        this.recipeViewService = recipeViewService;
     }
 
     @GetMapping("/{recipeId}")
@@ -53,6 +60,13 @@ public class RecipeController {
             )
     {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes(pageable));
+    }
+
+    @GetMapping("/popular-top10")
+    public ResponseEntity<List<RecipeResponseDto>> getRecipePopularTop10(
+
+    ) {
+        return ResponseEntity.ok(recipeViewService.getRecipeByViewsOrder());
     }
 
     @PostMapping

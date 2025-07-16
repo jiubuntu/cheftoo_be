@@ -96,7 +96,8 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
 
         NumberExpression<Integer> sortOrder = cases.otherwise(Integer.MAX_VALUE);
 
-        return queryFactory
+        return
+                queryFactory
                 .select(Projections.constructor(RecipeResponseDto.class,
                         recipe.recipeId,
                         recipe.recipeTitle,
@@ -109,7 +110,42 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
                 .fetch();
     }
 
+    @Override
+    public List<RecipeResponseDto> findRecipesDateOrder() {
+        QRecipe recipe = QRecipe.recipe;
+        QImages images = QImages.images;
 
+        return
+                queryFactory.select(Projections.constructor(RecipeResponseDto.class,
+                recipe.recipeId,
+                recipe.member.memberId,
+                recipe.recipeTitle,
+                recipe.recipeContent,
+                recipe.member.nickname,
+                images.imgPath,
+                recipe.dataCreated,
+                recipe.dataUpdated
+                ))
+                .from(recipe)
+                .leftJoin(images).on(images.recipe.eq(recipe))
+                .limit(10)
+                .orderBy(recipe.dataCreated.desc())
+                .fetch()
+                .stream()
+                .map(dto -> {
+                    String key = dto.getImgPath();
+                    if (key != null && !key.isBlank()) {
+                        try {
+                            URL presignedUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+                            dto.setImgPath(presignedUrl.toString());
+                        } catch ( Exception e ) {
+                            log.error("[presignedUrl 발급 실패] Key: {}", key, e);
+                            dto.setImgPath(null);
+                        }
+                    }
+                    return dto;
+                }).toList();
+    }
 
 
 }

@@ -35,8 +35,11 @@ public class AuthController {
 
     // 현재 브라우저가 가진 jwt가 유효한지 체크 (홈화면 - 레시피 등록에서 사용)
     @GetMapping("/check")
-    public ResponseEntity<?> checkAuthSatatus(@CookieValue(value="jwt", required = false) String jwt) {
-        if (jwt == null || !jwtUtil.validateToken(jwt)) {
+    public ResponseEntity<?> checkAuthSatatus(
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        if (accessToken == null || !jwtUtil.validateToken(accessToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message","유효하지 않은 토큰"));
 
         }

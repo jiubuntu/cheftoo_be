@@ -13,5 +13,6 @@ import java.util.UUID;
 public interface RecipeRepositoryCustom {
     Page<RecipeResponseDto> findAllWithImage(Pageable pageable);
     List<RecipeResponseDto> findRecipesByViewsOrder(List<UUID> recipeIds);
+    List<RecipeResponseDto> findRecipesDateOrder();
 
 }
