@@ -1,9 +1,11 @@
 package jwhs.cheftoo.recipe.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.annotation.Nullable;
 import jwhs.cheftoo.cookingorder.entity.QCookingOrder;
 import jwhs.cheftoo.image.entity.QImages;
 import jwhs.cheftoo.image.enums.S3ImageType;
@@ -36,9 +38,15 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
     private final S3Service s3Service;
 
     @Override
-    public Page<RecipeResponseDto> findAllWithImage(Pageable pageable) {
+    public Page<RecipeResponseDto> findAllWithImage(Pageable pageable, @Nullable String keyword) {
         QRecipe recipe = QRecipe.recipe;
         QImages images = QImages.images;
+
+
+        BooleanBuilder where = new BooleanBuilder();
+        if (keyword != null && !keyword.isBlank()) {
+            where.and(recipe.recipeTitle.containsIgnoreCase(keyword));
+        }
 
         List<RecipeResponseDto> content = queryFactory
                 .select(Projections.constructor(RecipeResponseDto.class,
@@ -53,6 +61,7 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
                         ))
                 .from(recipe)
                 .leftJoin(images).on(images.recipe.eq(recipe))
+                .where(where)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(recipe.dataCreated.desc())

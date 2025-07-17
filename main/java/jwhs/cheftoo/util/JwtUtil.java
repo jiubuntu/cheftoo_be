@@ -147,4 +147,12 @@ public class JwtUtil {
         return UUID.fromString(claims.getSubject());
     }
 
+    public void deleteRefreshTokenCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+//        cookie.setSecure(true);
+        cookie.setMaxAge(0);    // 즉시 만료
+        response.addCookie(cookie);
+    }
 }

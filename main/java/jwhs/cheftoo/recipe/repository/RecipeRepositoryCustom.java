@@ -1,5 +1,6 @@
 package jwhs.cheftoo.recipe.repository;
 
+import jakarta.annotation.Nullable;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeWithImageDto;
@@ -11,8 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RecipeRepositoryCustom {
-    Page<RecipeResponseDto> findAllWithImage(Pageable pageable);
+    Page<RecipeResponseDto> findAllWithImage(Pageable pageable, @Nullable String keyword);
     List<RecipeResponseDto> findRecipesByViewsOrder(List<UUID> recipeIds);
     List<RecipeResponseDto> findRecipesDateOrder();
+
 
 }

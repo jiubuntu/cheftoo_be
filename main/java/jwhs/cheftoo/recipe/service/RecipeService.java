@@ -20,6 +20,8 @@ import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.ingredient.repository.IngredientsRepository;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import jwhs.cheftoo.sauce.entity.Sauce;
+import jwhs.cheftoo.sauce.service.SauceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,6 +53,7 @@ public class RecipeService {
     private final ImageRepository imageRepository;
     private final S3Service s3Service;
     private final RecipeViewService recipeViewService;
+    private final SauceService sauceService;
 
     // 단건조회(상세조회)
     public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId) {
@@ -69,6 +72,12 @@ public class RecipeService {
         List<Ingredients> ingredientsList = ingredientsRepository.findAllByRecipe(recipe);
         List<RecipeDetailResponseDto.Ingredients> ingredients = ingredientsList.stream()
                 .map(RecipeDetailResponseDto.Ingredients::fromEntity)
+                .collect(Collectors.toList());
+
+        // 소스 조회
+        List<Sauce> sauceList = sauceService.findAllSauceByRecipe(recipe);
+        List<RecipeDetailResponseDto.Sauce> sauces = sauceList.stream()
+                .map(RecipeDetailResponseDto.Sauce::fromEntity)
                 .collect(Collectors.toList());
 
 
@@ -113,8 +122,8 @@ public class RecipeService {
 
 
     // 전체조회
-    public Page<RecipeResponseDto> findAllRecipes(Pageable pageable) {
-        return recipeRepository.findAllWithImage(pageable);
+    public Page<RecipeResponseDto> findAllRecipes(Pageable pageable, String keyword) {
+        return recipeRepository.findAllWithImage(pageable, keyword);
     }
 
 
@@ -132,7 +141,10 @@ public class RecipeService {
             // 3. 재료 저장
             saveIngredienets(recipeRequestDto, recipe);
 
-            // 4. 조리순서 이미지 메타데이터 저장
+            // 4. 소스 저장
+            saveSauce(recipeRequestDto, recipe);
+
+            // 5. 조리순서 이미지 메타데이터 저장
             saveCookingOrders(recipeRequestDto, recipe, member);
 
             return recipe;
@@ -201,6 +213,22 @@ public class RecipeService {
 
     private void saveIngredienets(RecipeRequestDto recipeRequestDto, Recipe recipe) {
         if (recipeRequestDto.getIngredients().size() > 0) {
+            List<Ingredients> ingredients = recipeRequestDto.getIngredients().stream()
+                    .map(ingredient -> {
+                        return Ingredients.builder()
+                                .recipe(recipe)
+                                .ingredientsName(ingredient.getIngredientsName())
+                                .ingredientsNum(ingredient.getIngredientsNum())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            ingredientsRepository.saveAll(ingredients);
+        }
+    }
+
+    private void saveSauce(RecipeRequestDto recipeRequestDto, Recipe recipe) {
+        if (recipeRequestDto.get().size() > 0) {
             List<Ingredients> ingredients = recipeRequestDto.getIngredients().stream()
                     .map(ingredient -> {
                         return Ingredients.builder()

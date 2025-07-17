@@ -38,4 +38,6 @@ public class MemberService {
         return memberRepository.findNickNameByMemberId(memberId);
     }
 
+
+
 }

@@ -107,6 +107,27 @@ public class AuthController {
         }
     }
 
+    @PostMapping("logout")
+    public ResponseEntity<?> logout(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String refreshToken = jwtUtil.getRefreshTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(refreshToken);
+
+        // 쿠키에서 refreshToken 삭제
+        jwtUtil.deleteRefreshTokenCookie(response);
+
+        // redis 에 저장된 리프레시 토큰 조회
+        String savedRefreshToken = refreshTokenService.getRefreshToken(memberId);
+        if (savedRefreshToken != null && !savedRefreshToken.isEmpty()) {
+            // redis 삭제
+            refreshTokenService.deleteRefreshToken(memberId);
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+
+    }
+
 //    @PostMapping("logout")
 //    public ResponseEntity<?> logout(
 //            HttpServletRequest request

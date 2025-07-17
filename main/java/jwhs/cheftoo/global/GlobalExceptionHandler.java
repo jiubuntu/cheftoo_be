@@ -1,5 +1,6 @@
 package jwhs.cheftoo.global;
 
+import io.lettuce.core.RedisException;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
@@ -104,6 +105,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleRecipeFindException(RecipeFindException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", "RecipeFindException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    @ExceptionHandler(RedisException.class)
+    public ResponseEntity<Map<String, String>> handleRedisException(RedisException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "RedisException");
         error.put("message", ex.getMessage());
 
         return ResponseEntity

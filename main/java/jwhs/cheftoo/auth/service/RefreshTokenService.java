@@ -1,8 +1,10 @@
 package jwhs.cheftoo.auth.service;
 
 
+import io.lettuce.core.RedisException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,7 @@ public class RefreshTokenService {
             redisTemplate.delete("refreshToken:" + memberId);
         } catch (Exception e) {
             log.error("[Redis 삭제 실패] memberId: {}", memberId, e);
+            throw new RedisException("Redis 데이터 삭제 중 에러 발생");
         }
     }
 

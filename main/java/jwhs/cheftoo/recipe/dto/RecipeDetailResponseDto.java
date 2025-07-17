@@ -58,6 +58,24 @@ public class RecipeDetailResponseDto {
 
     @Getter
     @Builder
+    public static class Sauce {
+        private UUID sauceId;
+        private UUID recipeId;
+        private String sauceName;
+        private String quantity;
+
+        public static Sauce fromEntity(jwhs.cheftoo.sauce.entity.Sauce entity) {
+            return Sauce.builder()
+                    .sauceId(entity.getSauceId())
+                    .recipeId(entity.getRecipe().getRecipeId())
+                    .sauceName(entity.getSauceName())
+                    .quantity(entity.getQuantity())
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder
     public static class CookingOrder {
         private UUID cookingOrderId;
         private UUID recipeId;

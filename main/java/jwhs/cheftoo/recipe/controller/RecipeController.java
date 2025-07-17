@@ -45,6 +45,7 @@ public class RecipeController {
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
     }
 
+
     @GetMapping("/member")
     public ResponseEntity<?> getAllRecipeByMember( HttpServletRequest request) {
         String token = jwtUtil.getAccessTokenFromRequest(request);
@@ -56,10 +57,11 @@ public class RecipeController {
     @GetMapping
     public ResponseEntity<Page<RecipeResponseDto>> getAllRecipe(
             @PageableDefault(size = 10, sort = "dataCreated", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(value = "keyword", required = false) String keyword
             )
     {
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes(pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipes(pageable, keyword));
     }
 
     @GetMapping("/popular-top10")
