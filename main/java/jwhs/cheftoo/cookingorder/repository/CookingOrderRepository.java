@@ -11,4 +11,7 @@ public interface CookingOrderRepository extends JpaRepository<CookingOrder, UUID
 
     List<CookingOrder> findByRecipeOrderByOrderDesc(Recipe recipe); // order(순서)컬럼은 내림차순으로 가져오기
     void deleteByRecipe(Recipe recipe);
+    List<CookingOrder> findAllByRecipe(Recipe recipe);
+
+
 }

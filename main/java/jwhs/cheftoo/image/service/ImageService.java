@@ -1,8 +1,5 @@
 package jwhs.cheftoo.image.service;
 
-import jwhs.cheftoo.auth.entity.Member;
-import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
-import jwhs.cheftoo.cookingorder.entity.CookingOrder;
 import jwhs.cheftoo.cookingorder.repository.CookingOrderRepository;
 import jwhs.cheftoo.image.entity.Images;
 import jwhs.cheftoo.image.exception.MainImageNotFoundException;
@@ -25,8 +22,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
@@ -88,7 +83,7 @@ public class ImageService {
         });
     }
 
-    public Images findMainImageByRecipeId(Recipe recipe) {
+    public Images findMainImageByRecipe(Recipe recipe) {
         return imageRepository.findMainImageByRecipe(recipe)
                 .orElseThrow(() -> new MainImageNotFoundException("레시피의 대표 이미지를 찾을 수 없습니다."));
     }

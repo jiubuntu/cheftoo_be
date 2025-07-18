@@ -3,6 +3,7 @@ package jwhs.cheftoo.recipe.service;
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.service.MemberService;
+import jwhs.cheftoo.cookingorder.service.CookingOrderService;
 import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
 import jwhs.cheftoo.cookingorder.entity.CookingOrder;
 import jwhs.cheftoo.image.entity.Images;
@@ -13,7 +14,6 @@ import jwhs.cheftoo.image.service.S3Service;
 import jwhs.cheftoo.recipe.dto.RecipeDetailResponseDto;
 import jwhs.cheftoo.recipe.dto.RecipeRequestDto;
 import jwhs.cheftoo.ingredient.entity.Ingredients;
-import jwhs.cheftoo.recipe.dto.RecipeWithImageDto;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
@@ -32,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -50,6 +49,7 @@ public class RecipeService {
     private final CookingOrderRepository cookingOrderRepository;
     private final ImageService imageService;
     private final MemberService memberService;
+    private final CookingOrderService cookingOrderService;
     private final ImageRepository imageRepository;
     private final S3Service s3Service;
     private final RecipeViewService recipeViewService;
@@ -63,7 +63,7 @@ public class RecipeService {
                 .orElseThrow(() -> new NoSuchElementException("해당되는 레시피를 찾을 수 없습니다."));
 
         // 대표 이미지 조회
-        RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipeId(recipe));
+        RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipe(recipe));
         String key = images.getImgPath();
         URL recipeImagePresignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
 
@@ -114,7 +114,7 @@ public class RecipeService {
         Member member = memberService.findMemberById(memberId);
         return  recipeRepository.findAllByMember(member).stream()
                 .map(recipe -> {
-                    String imgPath = imageService.findMainImageByRecipeId(recipe).getImgPath();
+                    String imgPath = imageService.findMainImageByRecipe(recipe).getImgPath();
                     return RecipeResponseDto.fromEntity(recipe, imgPath);
                 })
                 .collect(Collectors.toList());
@@ -228,18 +228,18 @@ public class RecipeService {
     }
 
     private void saveSauce(RecipeRequestDto recipeRequestDto, Recipe recipe) {
-        if (recipeRequestDto.get().size() > 0) {
-            List<Ingredients> ingredients = recipeRequestDto.getIngredients().stream()
-                    .map(ingredient -> {
-                        return Ingredients.builder()
+        if (recipeRequestDto.getSauce().size() > 0) {
+            List<Sauce> sauceList = recipeRequestDto.getSauce().stream()
+                    .map(sauce -> {
+                        return Sauce.builder()
                                 .recipe(recipe)
-                                .ingredientsName(ingredient.getIngredientsName())
-                                .ingredientsNum(ingredient.getIngredientsNum())
+                                .sauceName(sauce.getSauceName())
+                                .quantity(sauce.getQuantity())
                                 .build();
-                    })
-                    .collect(Collectors.toList());
+                    }).toList();
 
-            ingredientsRepository.saveAll(ingredients);
+
+            sauceService.saveAll(sauceList);
         }
     }
 
@@ -297,9 +297,22 @@ public class RecipeService {
         cookingOrderRepository.deleteByRecipe(recipe);
         ingredientsRepository.deleteByRecipe(recipe);
         imageService.deleteByRecipeId(recipe);
+        sauceService.deleteByRecipe(recipe);
 
-        // 마지막에 부모 엔티티 삭제
+        // 레시피 이미지 S3에서 삭제
+        deleteRecipeImageByRecipe(recipe);
+        // 조리순서 이미지 S3에서 삭제
+        cookingOrderService.deleteCookingOrderImageByRecipe(recipe);
+
+        // 헤더 삭제
         recipeRepository.delete(recipe);
+    }
+
+
+
+    public void deleteRecipeImageByRecipe(Recipe recipe) {
+        String savedRecipeImageKey = imageService.findMainImageByRecipe(recipe).getImgPath();
+        s3Service.deleteRecipeImage(savedRecipeImageKey);
     }
 
 

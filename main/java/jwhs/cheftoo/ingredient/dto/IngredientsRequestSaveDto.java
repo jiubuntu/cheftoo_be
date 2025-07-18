@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class IngredientsRequestSaveDto {
     private String ingredientsName;
     private String ingredientsNum;
+
 }

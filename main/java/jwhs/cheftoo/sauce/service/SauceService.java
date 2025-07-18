@@ -23,5 +23,9 @@ public class SauceService {
         sauceRepository.saveAll(sauceList);
     }
 
+    public void deleteByRecipe(Recipe recipe) {
+        sauceRepository.deleteByRecipe(recipe);
+    }
+
 
 }

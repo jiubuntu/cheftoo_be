@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface SauceRepository extends JpaRepository<Sauce, UUID> {
 
     List<Sauce> findAllByRecipe(Recipe recipe);
+    void deleteByRecipe(Recipe recipe);
 }
