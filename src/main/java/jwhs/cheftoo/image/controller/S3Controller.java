@@ -48,8 +48,8 @@ public class S3Controller {
     // 레시피 이미지 저장 presignedURL 발급
     @GetMapping("recipe-image/presigned-put")
     public ResponseEntity<String> getRecipePresignedPutUrl(
-            @RequestParam String contentType,
-            @RequestParam String fileName
+            @RequestParam("contentType") String contentType,
+            @RequestParam("fileName") String fileName
     ) {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String path = recipeImageKey + "/" + today + "/";
@@ -60,11 +60,12 @@ public class S3Controller {
         return ResponseEntity.ok(url.toString());
     }
 
+
     // 조리순서 이미지 저장 presignedURL 발급
     @GetMapping("cooking-order-image/presigned-put")
     public ResponseEntity<String> getCookingOrderPresignedPutUrl(
-            @RequestParam String contentType,
-            @RequestParam String fileName
+            @RequestParam("contentType") String contentType,
+            @RequestParam("fileName") String fileName
     ) {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String path = cookingOrderImageKey + "/" + today + "/";
