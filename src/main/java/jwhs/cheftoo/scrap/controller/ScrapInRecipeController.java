@@ -22,7 +22,7 @@ public class ScrapInRecipeController {
         this.jwtUtil = jwtUtil;
     }
 
-    @PostMapping("member/scrap/recipe")
+    @PostMapping("member/scrap/{scrapId}/recipe/{recipeId}")
     public ResponseEntity<ScrapInRecipeResponseDto> saveScrapInRecipe(
            @PathVariable("scrapId") UUID scrapId,
            @PathVariable("recipeId") UUID recipeId,
@@ -30,12 +30,11 @@ public class ScrapInRecipeController {
     ) {
 
         scrapInRecipeService.saveScrapInRecipe(scrapId, recipeId);
-
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
-    @GetMapping("member/scrap/recipe")
+    @GetMapping("member/scrap/{scrapId}/recipe")
     public ResponseEntity<ScrapInRecipeResponseDto> getAllRecipeByScrapId(
             @PathVariable("scrapId") UUID scrapId
     ) {

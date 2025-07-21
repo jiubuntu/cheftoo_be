@@ -62,10 +62,12 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findByRecipeId(recipeId)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 레시피를 찾을 수 없습니다."));
 
-        // 대표 이미지 조회
+        // 대표 이미지 조회 (presignedURL 생성)
         RecipeDetailResponseDto.Images images = RecipeDetailResponseDto.Images.fromEntity(imageService.findMainImageByRecipe(recipe));
         String key = images.getImgPath();
-        URL recipeImagePresignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+        URL RecipeImagePrisignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+        String RecipeImageUrl = RecipeImagePrisignedGetUrl != null ? RecipeImagePrisignedGetUrl.toString() : null;
+        images.setImgPath(RecipeImageUrl);
 
 
         // 재료 조회
@@ -76,17 +78,18 @@ public class RecipeService {
 
         // 소스 조회
         List<Sauce> sauceList = sauceService.findAllSauceByRecipe(recipe);
-        List<RecipeDetailResponseDto.Sauce> sauces = sauceList.stream()
+        List<RecipeDetailResponseDto.Sauce> sauce = sauceList.stream()
                 .map(RecipeDetailResponseDto.Sauce::fromEntity)
                 .collect(Collectors.toList());
 
 
-        // 조리순서 조회
+        // 조리순서 조회 presignedURL 생성)
         List<CookingOrder> cookingOrderList = cookingOrderRepository.findByRecipeOrderByOrderDesc(recipe).stream()
                 .map(step -> {
                     String objkey = step.getImgPath();
                     URL prisignedGetUrl = s3Service.generateCookingOrderImagePresignedGetUrl(objkey, S3ImageType.COOKING_ORDER_GET_DURATION);
-                    step.setImgPath(prisignedGetUrl.toString());
+                    String imageUrl = prisignedGetUrl != null ? prisignedGetUrl.toString() : null;
+                    step.setImgPath(imageUrl);
                     return step;
                 })
                 .toList();
@@ -102,6 +105,7 @@ public class RecipeService {
                 .recipeContent(recipe.getRecipeContent())
                 .images(images)
                 .ingredients(ingredients)
+                .sauce(sauce)
                 .cookingOrder(cookingOrder)
                 .build();
 
@@ -149,6 +153,7 @@ public class RecipeService {
 
             return recipe;
         } catch ( Exception e) {
+            e.printStackTrace();
             throw new RecipeCreateException("레시피 저장 중 에러가 발생했습니다.");
         }
     }
@@ -252,6 +257,7 @@ public class RecipeService {
         List<CookingOrder> cookingOrderForSave = steps.stream()
                 .map( step -> {
                             return CookingOrder.builder()
+                                    .recipe(recipe)
                                     .order(step.getOrder())
                                     .content(step.getContent())
                                     .imgPath(step.getCookingOrderImageKey())

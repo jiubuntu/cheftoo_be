@@ -55,6 +55,10 @@ public class S3Service {
 
     // presigned URL 발급 (GET)
     public URL generateImagePresignedGetUrl(String bucket, String key, Duration duration) {
+        if (key == null) {
+            return null;
+        }
+
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
@@ -66,6 +70,7 @@ public class S3Service {
                 .build();
 
         return s3Presigner.presignGetObject(presignRequest).url();
+
     }
 
     // presigned URL 발급 (PUT)

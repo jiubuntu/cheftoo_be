@@ -22,6 +22,7 @@ public class RecipeDetailResponseDto {
     private List<CookingOrder> cookingOrder;
 
     @Getter
+    @Setter
     @Builder
     public static class Images {
         private UUID imageId;
