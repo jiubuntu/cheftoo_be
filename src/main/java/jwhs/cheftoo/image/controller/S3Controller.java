@@ -1,9 +1,11 @@
 package jwhs.cheftoo.image.controller;
 
+import jwhs.cheftoo.image.dto.PresignedUrlResponseDto;
 import jwhs.cheftoo.image.enums.S3ImageType;
 import jwhs.cheftoo.image.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,7 +49,7 @@ public class S3Controller {
 
     // 레시피 이미지 저장 presignedURL 발급
     @GetMapping("recipe-image/presigned-put")
-    public ResponseEntity<String> getRecipePresignedPutUrl(
+    public ResponseEntity<PresignedUrlResponseDto> getRecipePresignedPutUrl(
             @RequestParam("contentType") String contentType,
             @RequestParam("fileName") String fileName
     ) {
@@ -57,13 +59,18 @@ public class S3Controller {
         String key = path + fileName;
 
         URL url = s3Service.generateRecipeImagePresignedPutUrl(key, contentType, S3ImageType.RECIPE_PUT_DURATION);
-        return ResponseEntity.ok(url.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(
+                PresignedUrlResponseDto.builder()
+                        .url(url.toString())
+                        .key(key)
+                        .build()
+        );
     }
 
 
     // 조리순서 이미지 저장 presignedURL 발급
     @GetMapping("cooking-order-image/presigned-put")
-    public ResponseEntity<String> getCookingOrderPresignedPutUrl(
+    public ResponseEntity<PresignedUrlResponseDto> getCookingOrderPresignedPutUrl(
             @RequestParam("contentType") String contentType,
             @RequestParam("fileName") String fileName
     ) {
@@ -73,6 +80,12 @@ public class S3Controller {
         String key = path + fileName;
 
         URL url = s3Service.generateCookingOrderImagePresignedPutUrl(key, contentType, S3ImageType.COOKING_ORDER_PUT_DURATION);
-        return ResponseEntity.ok(url.toString());
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                PresignedUrlResponseDto.builder()
+                        .url(url.toString())
+                        .key(key)
+                        .build()
+        );
     }
 }
