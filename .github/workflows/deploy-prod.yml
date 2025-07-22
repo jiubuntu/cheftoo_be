@@ -15,8 +15,7 @@ jobs:
 
       - name: Create application.properties file from secret
         run: |
-          mkdir -p app-config
-          echo "${{ secrets.APP_PROD_PROPERTIES }}" > app-config/application.properties
+          echo "${{ secrets.APP_PROD_PROPERTIES }}" > application.properties
 
       - name: Copy application.properties to EC2
         uses: appleboy/scp-action@v0.1.3
