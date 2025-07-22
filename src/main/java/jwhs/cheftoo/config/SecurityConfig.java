@@ -44,6 +44,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.DELETE,"/recipe/comment/*").authenticated()
                     .requestMatchers(HttpMethod.POST,"/recipe").authenticated()
                     .requestMatchers(HttpMethod.DELETE,"/recipe").authenticated()
+                    .requestMatchers(HttpMethod.GET,"/recipe/member").authenticated()
                     .requestMatchers("/member/scrap/**").authenticated()
                     .anyRequest().permitAll()
                 )
