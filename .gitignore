@@ -45,4 +45,4 @@ out/
 src/main/generated/
 
 ## properties 파일
-src/main/resources/application.properties
+src/main/resources/*.properties

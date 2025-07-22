@@ -77,3 +77,9 @@ clean {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+// plain JAR 생성 방지
+tasks.named('jar') {
+	enabled = false
+}
