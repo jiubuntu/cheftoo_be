@@ -1,4 +1,4 @@
-name: Deploy to EC2 on Main Push
+name: Deploy Backend (Blue-Green)
 
 on:
   push:
@@ -10,43 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create application.properties file from secret
+      - name: Decode EC2 SSH Key
         run: |
-          echo "${{ secrets.APP_PROD_PROPERTIES }}" > application.properties
+          echo "${{ secrets.SERVER_SSH_KEY }}" | base64 -d > key.pem
+          chmod 600 key.pem
 
-      - name : Create env file from secret
+      - name: Determine Active Stack
+        id: check_stack
         run: |
-          echo "${{ secrets.ENV_PROD }}" > .env
+          STACK=$(ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cat /home/ubuntu/current-stack.txt")
+          if [ "$STACK" == "blue" ]; then
+            echo "target_stack=green" >> $GITHUB_OUTPUT
+          else
+            echo "target_stack=blue" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Copy application.properties to EC2
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: application.properties
-          target: ${{ secrets.SERVER_PATH_BE_RESOURCES }}
+      - name: Set TARGET_STACK
+        run: echo "Deploying to ${{ steps.check_stack.outputs.target_stack }}"
 
-      - name: Copy .env to EC2
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: .env
-          target: ${{ secrets.SERVER_PATH_BE }}
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Deploy via SSH to EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd ${{ secrets.SERVER_PATH_BE }}
-            git pull origin main
-            docker compose --env-file .env -f docker/docker-compose-prod.yml down
-            docker compose --env-file .env -f docker/docker-compose-prod.yml up -d --build
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
+
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
+          docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
+          cd ${{ secrets.SERVER_PATH_BE }}
+          git pull origin main
+          docker-compose -f docker/docker-compose.${{ steps.check_stack.outputs.target_stack }}.yml up -d backend-${{ steps.check_stack.outputs.target_stack }}
+          echo "${{ steps.check_stack.outputs.target_stack }}" > /home/ubuntu/current-stack.txt
+          EOF

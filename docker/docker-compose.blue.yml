@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  backend-blue:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: cheftoo-backend-blue
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://cheftoo-mysql-prod:3306/${MYSQL_DATABASE_PROD}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER_PROD}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD_PROD}
+      SPRING_REDIS_HOST: cheftoo-redis-prod
+      SPRING_REDIS_PORT: 6379
+    networks:
+      - cheftoo-net-prod
+
+networks:
+  cheftoo-net-prod:
