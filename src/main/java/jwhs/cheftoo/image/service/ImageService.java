@@ -84,9 +84,10 @@ public class ImageService {
     }
 
     public Images findMainImageByRecipe(Recipe recipe) {
-        return imageRepository.findMainImageByRecipe(recipe)
+        return imageRepository.findByRecipe(recipe)
                 .orElseThrow(() -> new MainImageNotFoundException("레시피의 대표 이미지를 찾을 수 없습니다."));
     }
+
 
     private String getImageHash(MultipartFile file) throws IOException {
         return DigestUtils.sha256Hex(file.getInputStream());

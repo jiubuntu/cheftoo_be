@@ -296,19 +296,19 @@ public class RecipeService {
     @Transactional
     public void deleteRecipe(UUID recipeId) {
         // 존재 여부 확인 (Optional 처리 생략 가능)
-        Recipe recipe = recipeRepository.findById(recipeId)
+        Recipe recipe = recipeRepository.findByRecipeId(recipeId)
                 .orElseThrow(() -> new NoSuchElementException("레시피가 존재하지 않습니다."));
+
+        // 레시피 이미지 S3에서 삭제
+        deleteRecipeImageByRecipe(recipe);
+        // 조리순서 이미지 S3에서 삭제
+        cookingOrderService.deleteCookingOrderImageByRecipe(recipe);
 
         // 자식 엔티티 먼저 삭제
         cookingOrderRepository.deleteByRecipe(recipe);
         ingredientsRepository.deleteByRecipe(recipe);
         imageService.deleteByRecipeId(recipe);
         sauceService.deleteByRecipe(recipe);
-
-        // 레시피 이미지 S3에서 삭제
-        deleteRecipeImageByRecipe(recipe);
-        // 조리순서 이미지 S3에서 삭제
-        cookingOrderService.deleteCookingOrderImageByRecipe(recipe);
 
         // 헤더 삭제
         recipeRepository.delete(recipe);

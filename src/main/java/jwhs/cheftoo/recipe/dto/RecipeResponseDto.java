@@ -27,6 +27,18 @@ public class RecipeResponseDto {
     private LocalDateTime dataCreated;
     private LocalDateTime dataUpdated;
 
+    public RecipeResponseDto(
+            UUID recipeId,
+            String recipeTitle,
+            String recipeContent,
+            LocalDateTime dataCreated
+    ) {
+        this.recipeId = recipeId;
+        this.recipeTitle = recipeTitle;
+        this.recipeContent = recipeContent;
+        this.dataCreated = dataCreated;
+    }
+
 
     // Entity를 Dto로 변환
     public static RecipeResponseDto fromEntity(Recipe recipe, String imgPath) {

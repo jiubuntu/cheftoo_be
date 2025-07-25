@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface ImageRepository extends JpaRepository<Images, UUID> {
 
-    Optional<Images> findMainImageByRecipe(Recipe recipe);
+    Optional<Images> findByRecipe(Recipe recipe);
 
     @Modifying
     @Query("DELETE FROM Images i WHERE i.imageId = :imageId")
