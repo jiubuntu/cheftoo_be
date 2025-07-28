@@ -118,8 +118,10 @@ public class RecipeService {
         Member member = memberService.findMemberById(memberId);
         return  recipeRepository.findAllByMember(member).stream()
                 .map(recipe -> {
-                    String imgPath = imageService.findMainImageByRecipe(recipe).getImgPath();
-                    return RecipeResponseDto.fromEntity(recipe, imgPath);
+                    String key = imageService.findMainImageByRecipe(recipe).getImgPath();
+                    URL RecipeImagePrisignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+                    String RecipeImageUrl = RecipeImagePrisignedGetUrl != null ? RecipeImagePrisignedGetUrl.toString() : null;
+                    return RecipeResponseDto.fromEntity(recipe, RecipeImageUrl);
                 })
                 .collect(Collectors.toList());
     }

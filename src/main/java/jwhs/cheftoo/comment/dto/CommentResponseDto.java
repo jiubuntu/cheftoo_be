@@ -15,6 +15,7 @@ import java.util.UUID;
 public class CommentResponseDto {
     private UUID commentId;
     private UUID recipeId;
+    private UUID memberId;
     private String nickName;
     private String commentContent;
     @JsonFormat(pattern = "yy-MM-dd HH:mm")
@@ -24,6 +25,7 @@ public class CommentResponseDto {
         return CommentResponseDto.builder().
                 commentId(comment.getCommentId())
                 .recipeId(comment.getRecipe().getRecipeId())
+                .memberId(comment.getMember().getMemberId())
                 .nickName(nickName)
                 .commentContent(comment.getCommentContent())
                 .dataCreated(comment.getDataCreated())

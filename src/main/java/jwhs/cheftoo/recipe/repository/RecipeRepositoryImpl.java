@@ -92,6 +92,7 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
 
     public List<RecipeResponseDto> findRecipesByViewsOrder(List<UUID> recipeIds) {
         QRecipe recipe = QRecipe.recipe;
+        QImages images = QImages.images;
 
         CaseBuilder caseBuilder = new CaseBuilder();
         CaseBuilder.Cases<Integer, NumberExpression<Integer>> cases = null;
@@ -107,16 +108,34 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
 
         return
                 queryFactory
-                .select(Projections.constructor(RecipeResponseDto.class,
-                        recipe.recipeId,
-                        recipe.recipeTitle,
-                        recipe.recipeContent,
-                        recipe.dataCreated
-                ))
-                .from(recipe)
-                .where(recipe.recipeId.in(recipeIds))
-                .orderBy(sortOrder.asc()) // Redis 인기순 정렬 유지
-                .fetch();
+                        .select(Projections.constructor(RecipeResponseDto.class,
+                                recipe.recipeId,
+                                recipe.recipeTitle,
+                                recipe.recipeContent,
+                                images.imgPath,
+                                recipe.dataCreated
+                        ))
+                        .from(recipe)
+                        .leftJoin(images).on(images.recipe.eq(recipe))
+                        .where(recipe.recipeId.in(recipeIds))
+                        .orderBy(sortOrder.asc()) // Redis 인기순 정렬 유지
+                        .fetch()
+                        .stream()
+                        .map(dto -> {
+                            String key = dto.getImgPath();
+                            if (key != null && !key.isBlank()) {
+                                try {
+                                    URL presignedUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+                                    dto.setImgPath(presignedUrl.toString());
+                                } catch ( Exception e ) {
+                                    log.error("presignedUrl 발급 실패 - key: {}", key, e);
+                                    dto.setImgPath(null);
+                                }
+                            }
+                            return dto;
+                        })
+                        .toList();
+
     }
 
     @Override

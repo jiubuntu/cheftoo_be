@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/images")
+@RequestMapping("/api/images")
 public class S3Controller {
 
     private final S3Service s3Service;

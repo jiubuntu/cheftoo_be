@@ -31,11 +31,13 @@ public class RecipeResponseDto {
             UUID recipeId,
             String recipeTitle,
             String recipeContent,
+            String imgPath,
             LocalDateTime dataCreated
     ) {
         this.recipeId = recipeId;
         this.recipeTitle = recipeTitle;
         this.recipeContent = recipeContent;
+        this.imgPath = imgPath;
         this.dataCreated = dataCreated;
     }
 

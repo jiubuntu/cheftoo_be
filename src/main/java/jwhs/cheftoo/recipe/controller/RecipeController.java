@@ -23,7 +23,7 @@ import java.util.UUID;
 
 //레시피
 @RestController
-@RequestMapping("/recipe")
+@RequestMapping("/api/recipe")
 public class RecipeController {
 
     private RecipeService recipeService;

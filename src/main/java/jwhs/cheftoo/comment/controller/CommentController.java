@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/api")
 public class CommentController {
 
     private CommentService commentService;
@@ -25,7 +26,7 @@ public class CommentController {
         this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("recipe/comment/{recipeId}")
+    @GetMapping("recipe/{recipeId}/comment/")
     public ResponseEntity<List<CommentResponseDto>> getAllCommentByRecipe(@PathVariable("recipeId") UUID recipeId) {
         return ResponseEntity.status(HttpStatus.OK).body(commentService.findAllCommentByRecipe(recipeId));
     }

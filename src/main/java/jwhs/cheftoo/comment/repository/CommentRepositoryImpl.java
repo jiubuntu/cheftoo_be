@@ -25,6 +25,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                 .select(Projections.constructor(CommentResponseDto.class,
                     comment.commentId,
                     comment.recipe.recipeId,
+                    comment.member.memberId,
                     member.nickname,
                     comment.commentContent,
                     comment.dataCreated
