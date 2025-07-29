@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +42,18 @@ public class RecipeController {
     }
 
     @GetMapping("/{recipeId}")
-    public ResponseEntity<?> getRecipe(@PathVariable("recipeId") UUID recipeId) {
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
+    public ResponseEntity<?> getRecipe(
+            @PathVariable("recipeId") UUID recipeId,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = null;
+        try {
+            memberId = jwtUtil.getMemberIdFromToken(token);
+        } catch (Exception e) {
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId, memberId));
     }
 
 

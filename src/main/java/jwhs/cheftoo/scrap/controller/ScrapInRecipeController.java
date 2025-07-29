@@ -48,7 +48,7 @@ public class ScrapInRecipeController {
     public ResponseEntity<?> deleteScrapInRecipe(
             @RequestBody ScrapInRecipeDeleteRequestDto dto
             ) {
-        scrapInRecipeService.delete(dto);
+        scrapInRecipeService.deleteScrapInRecipeByScrapIdAndRecipeId(dto);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

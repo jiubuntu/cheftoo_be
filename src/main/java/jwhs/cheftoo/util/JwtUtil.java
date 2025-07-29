@@ -40,9 +40,9 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
 
     }
+
     private final long refreshTokenExpirationTime = 1000L * 60 * 60 * 24 * 14; // 2주
     private final long accessTokenExpriationTime = 900000; // 15분
-
 
 
     public String generateRefreshToken(UUID memberId) {

@@ -1,6 +1,8 @@
 package jwhs.cheftoo.scrap.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jwhs.cheftoo.image.entity.QImages;
 import jwhs.cheftoo.image.enums.S3ImageType;
@@ -8,6 +10,8 @@ import jwhs.cheftoo.image.service.S3Service;
 import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.entity.QRecipe;
 import jwhs.cheftoo.recipe.entity.Recipe;
+import jwhs.cheftoo.scrap.dto.ScrapInRecipeCheckAndCounDetailtDto;
+import jwhs.cheftoo.scrap.entity.QScrap;
 import jwhs.cheftoo.scrap.entity.QScrapInRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,5 +64,39 @@ public class ScrapInRecipeRepositoryImpl implements ScrapInRecipeRepositoryCusto
                             return dto;
                         }).toList();
 
+    }
+
+    @Override
+    public ScrapInRecipeCheckAndCounDetailtDto checkScrapAndCount(UUID recipeId, UUID memberId) {
+
+        QScrapInRecipe scrapInRecipe = QScrapInRecipe.scrapInRecipe;
+        QScrap scrap = QScrap.scrap;
+        boolean checkScrap = false;
+
+        if (memberId != null) {
+            checkScrap = queryFactory
+                    .selectFrom(scrapInRecipe)
+                    .join(scrapInRecipe.scrap, scrap)
+                    .where(
+                            scrapInRecipe.recipe.recipeId.eq(recipeId),
+                            scrap.member.memberId.eq(memberId)
+                    )
+                    .fetchFirst() != null;
+        }
+
+        long ScrapCount = queryFactory
+                .select(
+                        scrapInRecipe.count()
+                )
+                .from(scrapInRecipe)
+                .where(
+                        scrapInRecipe.recipe.recipeId.eq(recipeId)
+                )
+                .fetchOne();
+
+        return ScrapInRecipeCheckAndCounDetailtDto.builder()
+                .scrap(checkScrap)
+                .scrapCount(ScrapCount)
+                .build();
     }
 }

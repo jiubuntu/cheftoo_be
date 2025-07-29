@@ -20,7 +20,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("api/oauth")
 public class OauthController {
 
     private final KakaoService kakaoService;
@@ -60,7 +60,7 @@ public class OauthController {
         boolean isNewUser = (boolean) map.get("isNewUser");
 
         //리프레시 토큰 발급 (Http Only)
-        jwtUtil.addRefreshTokenToCookie((UUID) map.get("memberId"), response, (String) map.get("refreshToken")); // HttpOnly 방식으로 쿠키에 jwt담아 리턴
+        jwtUtil.addRefreshTokenToCookie((UUID) map.get("memberId"), response, refreshToken); // HttpOnly 방식으로 쿠키에 jwt담아 리턴
 
         // 다음페이지값이 있으면 다음 페이지로 이동
         // 다음페이지 값이 있는 경우 : 레시피 화면(prevPage) -> 레시피 등록 화면(nextPage)

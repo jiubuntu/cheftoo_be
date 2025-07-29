@@ -20,6 +20,8 @@ public class RecipeDetailResponseDto {
     private List<Ingredients> ingredients;
     private List<Sauce> sauce;
     private List<CookingOrder> cookingOrder;
+    private boolean scrap;
+    private long scrapCount;
 
     @Getter
     @Setter
