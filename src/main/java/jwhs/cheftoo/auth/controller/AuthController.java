@@ -71,14 +71,14 @@ public class AuthController {
 
     }
 
-    @PostMapping("refresh")
+    @PostMapping("/refresh")
     public void refresh(
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
         String refreshToken = jwtUtil.getRefreshTokenFromRequest(request);
-        String token = jwtUtil.getAccessTokenFromRequest(request);
-        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+//        String token = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(refreshToken);
         String savedRefreshToken = null;
 
         try {

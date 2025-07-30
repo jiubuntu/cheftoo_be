@@ -61,7 +61,7 @@ public class ScrapController {
         String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
-        scrapService.updateScrap(scrapRequestDto, memberId);
+        scrapService.updateScrap(scrapRequestDto, memberId, scrapId);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }

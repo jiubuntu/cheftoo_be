@@ -12,8 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScrapRequestDto {
-    @JsonProperty("scrapId")
-    private UUID scrapId;
     @JsonProperty("scrapName")
     private String scrapName;
 }

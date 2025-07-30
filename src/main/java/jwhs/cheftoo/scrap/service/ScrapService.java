@@ -61,13 +61,13 @@ public class ScrapService {
     }
 
     @Transactional
-    public ScrapResponseDto updateScrap(ScrapRequestDto scrapRequestDto, UUID memberId) {
+    public ScrapResponseDto updateScrap(ScrapRequestDto scrapRequestDto, UUID memberId, UUID scrapId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
         });
 
         Scrap scrap = Scrap.builder()
-                .scrapId(scrapRequestDto.getScrapId())
+                .scrapId(scrapId)
                 .scrapName(scrapRequestDto.getScrapName())
                 .member(member)
                 .build();
