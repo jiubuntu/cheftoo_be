@@ -66,15 +66,17 @@ public class ScrapService {
             throw new MemberNotFoundException("유저를 찾을 수 없습니다.");
         });
 
-        Scrap scrap = Scrap.builder()
-                .scrapId(scrapId)
-                .scrapName(scrapRequestDto.getScrapName())
-                .member(member)
-                .build();
+        Scrap scrap = scrapRepository.findById(scrapId).orElseThrow(() -> {
+            throw new ScrapNotFoundException("스크랩 폴더를 찾을 수 없습니다.");
+        });
 
-        Scrap savedScrap = scrapRepository.save(scrap);
+        scrap.setScrapName(scrapRequestDto.getScrapName());
 
-        return ScrapResponseDto.fromEntity(savedScrap);
+        Scrap updatedScrap = scrapRepository.save(scrap);
+
+        return ScrapResponseDto.fromEntity(updatedScrap);
+
+
     }
 
     @Transactional
