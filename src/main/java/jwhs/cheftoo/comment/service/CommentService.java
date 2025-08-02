@@ -103,4 +103,9 @@ public class CommentService {
         commentRepository.deleteById(commentId);
 
     }
+
+    @Transactional
+    public void deleteAllByMember(Member member) {
+        commentRepository.deleteAllByMember(member);
+    }
 }

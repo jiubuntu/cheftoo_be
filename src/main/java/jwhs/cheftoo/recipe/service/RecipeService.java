@@ -2,7 +2,7 @@ package jwhs.cheftoo.recipe.service;
 
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
-import jwhs.cheftoo.auth.service.MemberService;
+import jwhs.cheftoo.auth.port.MemberReader;
 import jwhs.cheftoo.cookingorder.service.CookingOrderService;
 import jwhs.cheftoo.cookingorder.dto.CookingOrderRequestSaveDto;
 import jwhs.cheftoo.cookingorder.entity.CookingOrder;
@@ -51,7 +51,7 @@ public class RecipeService {
     private final IngredientsRepository ingredientsRepository;
     private final CookingOrderRepository cookingOrderRepository;
     private final ImageService imageService;
-    private final MemberService memberService;
+    private final MemberReader memberReader;
     private final CookingOrderService cookingOrderService;
     private final ImageRepository imageRepository;
     private final S3Service s3Service;
@@ -60,7 +60,7 @@ public class RecipeService {
     private final ScrapInRecipeService scrapInRecipeService;
 
     // 단건조회(상세조회)
-    public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId, UUID memberId) {
+    public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId) {
 
         // 레시피 조회
         Recipe recipe = recipeRepository.findByRecipeId(recipeId)
@@ -100,7 +100,7 @@ public class RecipeService {
         List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderList);
 
         // 스크랩개수, 스크랩 수
-        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkBookMarkByRecipeAndMember(recipe.getRecipeId(), memberId);
+        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkBookMarkByRecipeAndMember(recipe.getRecipeId(), recipe.getMember().getMemberId());
 
         // 조회수 증가
         recipeViewService.incrementRecipeView(recipeId);
@@ -124,7 +124,7 @@ public class RecipeService {
     // 특정 멤버의 레시피 조회
     public List<RecipeResponseDto> findAllRecipesByMember(UUID memberId) {
 
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberReader.getById(memberId);
         return  recipeRepository.findAllByMember(member).stream()
                 .map(recipe -> {
                     String key = imageService.findMainImageByRecipe(recipe).getImgPath();
@@ -145,7 +145,7 @@ public class RecipeService {
     @Transactional
     public Recipe createRecipe(RecipeRequestDto recipeRequestDto, UUID memberId) {
         try {
-            Member member = memberService.findMemberById(memberId);
+            Member member = memberReader.getById(memberId);
 
             // 1. 레시피 메타데이터 저장
             Recipe recipe =  saveRecipe(null, member, recipeRequestDto);
@@ -173,7 +173,7 @@ public class RecipeService {
     @Transactional
     public UUID updateRecipe(RecipeRequestDto recipeRequestDto, UUID memberId, MultipartFile imageFile, List<MultipartFile> stepImages, UUID recipeId) throws  IOException{
         try {
-            Member member = memberService.findMemberById(memberId);
+            Member member = memberReader.getById(memberId);
             // 1. 레시피 저장
             Recipe recipe = saveRecipe(recipeId, member, recipeRequestDto);
 
@@ -330,6 +330,10 @@ public class RecipeService {
     public void deleteRecipeImageByRecipe(Recipe recipe) {
         String savedRecipeImageKey = imageService.findMainImageByRecipe(recipe).getImgPath();
         s3Service.deleteRecipeImage(savedRecipeImageKey);
+    }
+
+    public List<Recipe> findAllByMember(Member member) {
+        return recipeRepository.findAllByMember(member);
     }
 
 

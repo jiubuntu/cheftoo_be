@@ -43,17 +43,9 @@ public class RecipeController {
 
     @GetMapping("/{recipeId}")
     public ResponseEntity<?> getRecipe(
-            @PathVariable("recipeId") UUID recipeId,
-            HttpServletRequest request
+            @PathVariable("recipeId") UUID recipeId
     ) {
-        String token = jwtUtil.getAccessTokenFromRequest(request);
-        UUID memberId = null;
-        try {
-            memberId = jwtUtil.getMemberIdFromToken(token);
-        } catch (Exception e) {
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId, memberId));
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
     }
 
 

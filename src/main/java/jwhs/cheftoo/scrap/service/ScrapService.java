@@ -94,4 +94,9 @@ public class ScrapService {
         scrapRepository.deleteById(scrapId);
 
     }
+
+    @Transactional
+    public void deleteAllByMember(Member member) {
+        scrapRepository.deleteAllByMember(member);
+    }
 }

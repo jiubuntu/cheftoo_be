@@ -3,21 +3,29 @@ package jwhs.cheftoo.auth.service;
 
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.exception.MemberDeleteException;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.auth.repository.MemberRepository;
+import jwhs.cheftoo.comment.service.CommentService;
+import jwhs.cheftoo.recipe.entity.Recipe;
+import jwhs.cheftoo.recipe.repository.RecipeRepository;
+import jwhs.cheftoo.recipe.service.RecipeService;
+import jwhs.cheftoo.scrap.service.ScrapService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
 
-    private MemberRepository memberRepository;
-
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
+    private final MemberRepository memberRepository;
+    private final RecipeService recipeService;
+    private final ScrapService scrapService;
+    private final CommentService commentService;
 
     @Transactional
     public void updateNickname(UUID memberId, String nickname) {
@@ -38,6 +46,32 @@ public class MemberService {
         return memberRepository.findNickNameByMemberId(memberId);
     }
 
+    @Transactional
+    public void deleteMember(UUID memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+            throw new NoSuchElementException("member를 찾을 수 없습니다,");
+        });
+
+        //// detail 먼저 삭제
+        try {
+            // recipe 삭제
+            List<Recipe> recipeList = recipeService.findAllByMember(member);
+            for (Recipe recipe : recipeList) {
+                recipeService.deleteRecipe(recipe.getRecipeId());
+            }
+            // 스크랩 삭제
+            scrapService.deleteAllByMember(member);
+            // 댓글 삭제
+            commentService.deleteAllByMember(member);
+
+            //// header 삭제
+            memberRepository.deleteById(member.getMemberId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new MemberDeleteException("회원탈퇴 중 에러가 발생했습니다.");
+        }
+
+    }
 
 
 }

@@ -128,6 +128,19 @@ public class AuthController {
 
     }
 
+    @DeleteMapping("member/me")
+    public ResponseEntity<?> deleteMember(
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
 //    @PostMapping("logout")
 //    public ResponseEntity<?> logout(
 //            HttpServletRequest request

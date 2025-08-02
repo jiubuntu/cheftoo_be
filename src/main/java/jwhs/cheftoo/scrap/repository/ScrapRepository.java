@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface ScrapRepository extends JpaRepository<Scrap, UUID> {
     List<Scrap> findAllByMember(Member member);
+    void deleteAllByMember(Member member);
 }

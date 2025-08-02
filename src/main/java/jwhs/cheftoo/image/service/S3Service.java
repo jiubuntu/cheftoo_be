@@ -30,6 +30,10 @@ public class S3Service {
     private final S3Presigner s3Presigner;
 
     public void deleteImage(String key, String bucket) {
+        if (key == null || key.trim().isEmpty()) {
+            return ;
+        }
+
         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
