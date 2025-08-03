@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentRequestDto {
+public class CommentRequestSaveDto {
     @JsonProperty("commentContent")
     private String commentContent;
 

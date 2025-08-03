@@ -1,7 +1,8 @@
 package jwhs.cheftoo.comment.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jwhs.cheftoo.comment.dto.CommentRequestDto;
+import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
+import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
 import jwhs.cheftoo.comment.service.CommentService;
 import jwhs.cheftoo.util.JwtUtil;
@@ -35,7 +36,7 @@ public class CommentController {
     @PostMapping("recipe/{recipeId}/comment")
     public ResponseEntity<CommentResponseDto> saveComment(
             HttpServletRequest request,
-            @RequestBody CommentRequestDto dto,
+            @RequestBody CommentRequestSaveDto dto,
             @PathVariable("recipeId") UUID recipeId
     ) {
         String token = jwtUtil.getAccessTokenFromRequest(request);
@@ -47,13 +48,33 @@ public class CommentController {
     // 댓글 삭제
     @DeleteMapping("recipe/comment/{commentId}")
     public ResponseEntity<?> deleteComment(
-            @PathVariable UUID commentId,
+            @PathVariable("commentId") UUID commentId,
             HttpServletRequest request
     ) throws AccessDeniedException {
         String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
         commentService.deleteComment(commentId, memberId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/member/comment")
+    public ResponseEntity<List<CommentResponseDto>> getCommentByMember(
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+
+        List<CommentResponseDto> commentList = commentService.findAllCommentByMember(memberId);
+        return ResponseEntity.status(HttpStatus.OK).body(commentList);
+    }
+
+    @PutMapping("/comment")
+    public ResponseEntity<HttpStatus> updateComment(
+            @RequestBody CommentRequestUpdateDto dto
+    ) {
+        commentService.updateComment(dto);
+
         return ResponseEntity.ok().build();
     }
 

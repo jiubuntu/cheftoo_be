@@ -5,6 +5,7 @@ import jwhs.cheftoo.auth.exception.MemberDeleteException;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
 import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
+import jwhs.cheftoo.comment.exception.CommentSaveException;
 import jwhs.cheftoo.recipe.exception.RecipeCreateException;
 import jwhs.cheftoo.recipe.exception.RecipeFindException;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
@@ -129,6 +130,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleMemberDeleteException(MemberDeleteException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", "MemberDeleteException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    @ExceptionHandler(CommentSaveException.class)
+    public ResponseEntity<Map<String, String>> handleCommentSaveException(CommentSaveException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "CommentSaveException");
         error.put("message", ex.getMessage());
 
         return ResponseEntity

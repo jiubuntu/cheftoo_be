@@ -6,6 +6,7 @@ import jwhs.cheftoo.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,15 +39,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("api/oauth/kakao/callback").permitAll()
-                    .requestMatchers("api/mypage").authenticated()
-                    .requestMatchers(HttpMethod.POST,"api/recipe/*/comment").authenticated()
-                    .requestMatchers(HttpMethod.DELETE,"api/recipe/comment/*").authenticated()
-                    .requestMatchers(HttpMethod.POST,"api/recipe").authenticated()
-                    .requestMatchers(HttpMethod.DELETE,"api/recipe").authenticated()
-                    .requestMatchers(HttpMethod.GET,"api/recipe/member").authenticated()
-                    .requestMatchers("api/member/scrap/**").authenticated()
-                    .anyRequest().permitAll()
+                        .requestMatchers("api/oauth/kakao/callback").permitAll()
+                        .requestMatchers("api/mypage").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"api/auth/member/me").authenticated()
+                        .requestMatchers("api/auth/nickname").authenticated()
+                        .requestMatchers("api/auth/check").authenticated()
+                        .requestMatchers("api/auth/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST,"api/recipe/*/comment").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"api/recipe/comment/*").authenticated()
+                        .requestMatchers(HttpMethod.GET,"api/member/comment").authenticated()
+                        .requestMatchers(HttpMethod.PUT,"api/comment").authenticated()
+                        .requestMatchers(HttpMethod.POST,"api/recipe").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"api/recipe").authenticated()
+                        .requestMatchers(HttpMethod.GET,"api/recipe/member").authenticated()
+                        .requestMatchers("api/member/scrap/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sess -> sess.disable());

@@ -3,7 +3,9 @@ package jwhs.cheftoo.youtube.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jwhs.cheftoo.util.port.RedisUtil;
 import jwhs.cheftoo.youtube.dto.YoutubeResponseDto;
+import jwhs.cheftoo.youtube.enums.Youtube;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +27,9 @@ import java.util.Map;
 public class YoutubeService {
 
     private final RestTemplate restTemplate;
-    private final StringRedisTemplate redisTemplate;
+    private final RedisUtil redisUtil;
     private final ObjectMapper objectMapper;
-    private final String YOUTUBE_CACHE_KEY = "youtube:home:videos";
+
 
     @Value("${spring.datasource.youtube.api.key}")
     private String apiKey;
@@ -53,8 +54,13 @@ public class YoutubeService {
                     .toList();
 
             try {
-                String json = objectMapper.writeValueAsString(itemList);
-                redisTemplate.opsForValue().set(YOUTUBE_CACHE_KEY, json, Duration.ofDays(7));
+                Map<String , Object> data = new HashMap<>();
+                data.put("version", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+                data.put("videoIdList", itemList);
+
+                String json = objectMapper.writeValueAsString(data);
+                redisUtil.set(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), json);
+
             } catch (JsonProcessingException e) {
                 log.error("youtube videoId Redis 저장 중 에러가 발생하였습니다.", e.getMessage());
                 throw new RuntimeException("Redis 저장 중 JSON 변환 실패", e);
@@ -65,7 +71,7 @@ public class YoutubeService {
     // API로 노출
     public YoutubeResponseDto getCachedVideos() {
 
-        String json = (String) redisTemplate.opsForValue().get(YOUTUBE_CACHE_KEY);
+        String json = redisUtil.get(Youtube.YOUTUBE_CACHE_KEY.getCacheKey());
         if (json == null) return null;
 
         try {
@@ -76,6 +82,19 @@ public class YoutubeService {
         } catch (JsonProcessingException e) {
             log.error("yotube Redis 조회 중 JSON 역직렬화 오류");
             throw new RuntimeException("Youtube Redis 조회 중 JSON 역직렬화 실패", e);
+        }
+    }
+
+    public String getYoutubeVideoVersion() {
+        String json = redisUtil.get(Youtube.YOUTUBE_CACHE_KEY.getCacheKey());
+        if (json == null) return null;
+
+        try {
+            Map<String, Object> map = objectMapper.readValue(json, new TypeReference<>() {});
+            return (String) map.get("version");
+        } catch (Exception e) {
+            log.error("youtube version 조회 중 json 역직렬화 실패");
+            return null;
         }
     }
 

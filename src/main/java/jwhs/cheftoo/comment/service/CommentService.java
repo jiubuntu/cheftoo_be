@@ -1,49 +1,37 @@
 package jwhs.cheftoo.comment.service;
 
 
+import ch.qos.logback.core.encoder.EchoEncoder;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
-import jwhs.cheftoo.auth.exception.MemberNotFoundException;
-import jwhs.cheftoo.auth.repository.MemberRepository;
-import jwhs.cheftoo.comment.dto.CommentRequestDto;
+import jwhs.cheftoo.auth.port.MemberReader;
+import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
+import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
-import jwhs.cheftoo.comment.dto.CommentSummaryDto;
 import jwhs.cheftoo.comment.entity.Comment;
-import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
+import jwhs.cheftoo.comment.exception.CommentSaveException;
 import jwhs.cheftoo.comment.repository.CommentRepository;
-import jwhs.cheftoo.comment.repository.CommentRepositoryCustom;
 import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
-import jwhs.cheftoo.recipe.service.RecipeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
-    private EntityManager entityManager;
-    private RecipeRepository recipeRepository;
-    private MemberRepository memberRepository;
-    private CommentRepository commentRepository;
+    private final EntityManager entityManager;
+    private final RecipeRepository recipeRepository;
+    private final MemberReader memberReader;
+    private final CommentRepository commentRepository;
 
-    public CommentService(
-            RecipeRepository recipeRepository,
-            MemberRepository memberRepository,
-            CommentRepository commentRepository,
-            EntityManager entityManager
-    ) {
-        this.recipeRepository = recipeRepository;
-        this.memberRepository = memberRepository;
-        this.commentRepository = commentRepository;
-        this.entityManager = entityManager;
-    }
 
     //특정 레시피 모든 댓글 조회
     public List<CommentResponseDto> findAllCommentByRecipe(UUID recipeId) {
@@ -55,19 +43,28 @@ public class CommentService {
 
     }
 
+    public List<CommentResponseDto> findAllCommentByMember(UUID memberId) {
+        Member member = memberReader.getById(memberId);
+        String nickName = member.getNickname();
+
+        List<CommentResponseDto> commentList = commentRepository.findAllByMember(member).stream()
+                .map(comment -> CommentResponseDto.fromEntity(comment, nickName))
+                .toList();
+
+        return commentList;
+    }
+
     // 댓글 저장
     @Transactional
-    public CommentResponseDto createComment(CommentRequestDto dto, UUID memberId, UUID recipeId) {
+    public CommentResponseDto createComment(CommentRequestSaveDto dto, UUID memberId, UUID recipeId) {
         return saveComment(null,dto, memberId, recipeId);
     }
 
 
-    private CommentResponseDto saveComment(UUID commentId, CommentRequestDto dto, UUID memberId, UUID recipeId) {
+    private CommentResponseDto saveComment(UUID commentId, CommentRequestSaveDto dto, UUID memberId, UUID recipeId) {
         String commentContent = dto.getCommentContent();
 
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            throw new MemberNotFoundException("댓글을 작성한 유저를 찾을 수 없습니다.");
-        });
+        Member member = memberReader.getById(memberId);
 
         Recipe recipe = recipeRepository.findByRecipeId(recipeId).orElseThrow(() -> {
             throw new RecipeNotFoundException("레시피를 찾을 수 없습니다.");
@@ -107,5 +104,25 @@ public class CommentService {
     @Transactional
     public void deleteAllByMember(Member member) {
         commentRepository.deleteAllByMember(member);
+    }
+
+    @Transactional
+    public void updateComment(CommentRequestUpdateDto dto) {
+        UUID commentId = dto.getCommentId();
+        String newCommentContent = dto.getCommentContent();
+
+        Comment savedComment = commentRepository.findById(commentId).orElseThrow(() -> {
+            throw new CommentNotFoundException("댓글을 찾을 수 없습니다");
+        });
+
+        try {
+            savedComment.setCommentContent(newCommentContent);
+            commentRepository.save(savedComment);
+        } catch (Exception e) {
+            throw new CommentSaveException("댓글 저장 중 문제가 발생했습니다.");
+        }
+
+
+
     }
 }
