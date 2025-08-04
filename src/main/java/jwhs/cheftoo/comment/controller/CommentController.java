@@ -3,6 +3,7 @@ package jwhs.cheftoo.comment.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
 import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
+import jwhs.cheftoo.comment.dto.CommentResponseDetailDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
 import jwhs.cheftoo.comment.service.CommentService;
 import jwhs.cheftoo.util.JwtUtil;
@@ -59,13 +60,13 @@ public class CommentController {
     }
 
     @GetMapping("/member/comment")
-    public ResponseEntity<List<CommentResponseDto>> getCommentByMember(
+    public ResponseEntity<List<CommentResponseDetailDto>> getCommentByMember(
             HttpServletRequest request
     ) {
         String accessToken = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
 
-        List<CommentResponseDto> commentList = commentService.findAllCommentByMember(memberId);
+        List<CommentResponseDetailDto> commentList = commentService.findAllCommentByMember(memberId);
         return ResponseEntity.status(HttpStatus.OK).body(commentList);
     }
 

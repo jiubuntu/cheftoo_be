@@ -8,6 +8,7 @@ import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.port.MemberReader;
 import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
 import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
+import jwhs.cheftoo.comment.dto.CommentResponseDetailDto;
 import jwhs.cheftoo.comment.dto.CommentResponseDto;
 import jwhs.cheftoo.comment.entity.Comment;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
@@ -43,14 +44,9 @@ public class CommentService {
 
     }
 
-    public List<CommentResponseDto> findAllCommentByMember(UUID memberId) {
-        Member member = memberReader.getById(memberId);
-        String nickName = member.getNickname();
+    public List<CommentResponseDetailDto> findAllCommentByMember(UUID memberId) {
 
-        List<CommentResponseDto> commentList = commentRepository.findAllByMember(member).stream()
-                .map(comment -> CommentResponseDto.fromEntity(comment, nickName))
-                .toList();
-
+        List<CommentResponseDetailDto> commentList = commentRepository.findAllByMember(memberId);
         return commentList;
     }
 
@@ -105,6 +101,7 @@ public class CommentService {
     public void deleteAllByMember(Member member) {
         commentRepository.deleteAllByMember(member);
     }
+
 
     @Transactional
     public void updateComment(CommentRequestUpdateDto dto) {
