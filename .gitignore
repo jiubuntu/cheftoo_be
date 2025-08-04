@@ -44,4 +44,6 @@ out/
 src/main/generated/
 
 ## properties 파일
-src/main/resources/*.properties
+src/main/resources/application-dev.properties
+src/main/resources/application-prod.properties
+
