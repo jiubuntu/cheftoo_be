@@ -24,7 +24,7 @@ public class Member {
     @Column(name = "MemberId",updatable = false, nullable = false)
     private UUID memberId;
 
-    @Column(name = "KakaoId")
+    @Column(name = "KakaoId", unique = true)
     private String kakaoId;
 
     @Column(name = "Nickname", length = 50)

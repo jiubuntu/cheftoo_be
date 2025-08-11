@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jwhs.cheftoo.util.port.RedisUtil;
+import jwhs.cheftoo.youtube.dto.YoutubeCacheDataDto;
 import jwhs.cheftoo.youtube.dto.YoutubeResponseDto;
 import jwhs.cheftoo.youtube.enums.Youtube;
 import lombok.RequiredArgsConstructor;
@@ -75,9 +76,9 @@ public class YoutubeService {
         if (json == null) return null;
 
         try {
-            List<String> videoidList =  objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            YoutubeCacheDataDto cacheData =  objectMapper.readValue(json, YoutubeCacheDataDto.class);
             return YoutubeResponseDto.builder()
-                    .videoIdList(videoidList)
+                    .videoIdList(cacheData.getVideoList())
                     .build();
         } catch (JsonProcessingException e) {
             log.error("yotube Redis 조회 중 JSON 역직렬화 오류");
@@ -90,8 +91,8 @@ public class YoutubeService {
         if (json == null) return null;
 
         try {
-            Map<String, Object> map = objectMapper.readValue(json, new TypeReference<>() {});
-            return (String) map.get("version");
+            YoutubeCacheDataDto cacheData = objectMapper.readValue(json, YoutubeCacheDataDto.class);
+            return cacheData.getVersion();
         } catch (Exception e) {
             log.error("youtube version 조회 중 json 역직렬화 실패");
             return null;

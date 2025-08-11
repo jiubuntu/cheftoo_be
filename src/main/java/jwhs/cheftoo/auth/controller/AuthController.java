@@ -3,10 +3,14 @@ package jwhs.cheftoo.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jwhs.cheftoo.auth.dto.MemberConsentRequestDto;
+import jwhs.cheftoo.auth.service.KakaoService;
+import jwhs.cheftoo.auth.service.MemberConsentService;
 import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.auth.service.RefreshTokenService;
 import jwhs.cheftoo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +22,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
     private final JwtUtil jwtUtil;
     private final MemberService memberService;
     private final RefreshTokenService refreshTokenService;
+    private final KakaoService kakaoService;
+    private final MemberConsentService memberConsentService;
 
     @Value("${kakao.login.url}")
     private String KAKAO_LOGIN_URL;
@@ -124,10 +131,16 @@ public class AuthController {
             // redis 삭제
             refreshTokenService.deleteRefreshToken(memberId);
         }
+
+        // 카카오 로그아웃 처리
+        kakaoService.logoutWithKakao(memberId);
+
         return ResponseEntity.status(HttpStatus.OK).build();
 
     }
 
+
+    // 회원탈퇴
     @DeleteMapping("member/me")
     public ResponseEntity<?> deleteMember(
             HttpServletRequest request
@@ -135,20 +148,35 @@ public class AuthController {
         String accessToken = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
 
+        try {
+            // 카카오에서 토큰 무효화 처리
+            kakaoService.unlinkWithKakao(memberId);
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
         memberService.deleteMember(memberId);
+
+
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // 동의항목 저장
+    @PostMapping("/member/consent")
+    public ResponseEntity<?> saveMemberConsent(
+            HttpServletRequest request,
+            @RequestBody MemberConsentRequestDto dto
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
 
-//    @PostMapping("logout")
-//    public ResponseEntity<?> logout(
-//            HttpServletRequest request
-//    ) {
-//        String token = jwtUtil.getAccessTokenFromRequest(request);
-//        UUID memberId = jwtUtil.getMemberIdFromToken(token);
-//
-//        refreshTokenService.deleteRefreshToken(memberId);
-//
-//    }
+        memberConsentService.saveMemberConsent(dto, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+
 }

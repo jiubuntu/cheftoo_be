@@ -3,7 +3,7 @@ name: Deploy Backend (Blue-Green)
 on:
   push:
     branches:
-      - test
+      - main
 
 jobs:
   deploy:
@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Configure Spring Profile for Prod
+        run: |
+          cp src/main/resources/application-prod.properties src/main/resources/application.properties
 
       - name: Decode EC2 SSH Key
         run: |
@@ -63,9 +67,12 @@ jobs:
           export CLOUD_AWS_S3_COOKINGORDER_IMAGE_BUCKET="${{ secrets.CLOUD_AWS_S3_COOKINGORDER_IMAGE_BUCKET }}"
           export SPRING_DATASOURCE_YOUTUBE_API_KEY="${{ secrets.SPRING_DATASOURCE_YOUTUBE_API_KEY }}"
           export SPRING_DATASOURCE_YOUTUBE_API_URL="${{ secrets.SPRING_DATASOURCE_YOUTUBE_API_URL }}"
+          export POLICY_VERSION_PRIVACY="${{ secrets.POLICY_VERSION_PRIVACY }}"
+          export POLICY_VERSION_TOS="${{ secrets.POLICY_VERSION_TOS }}"
+          export POLICY_VERSION_SMS="${{ secrets.POLICY_VERSION_SMS }}"
+           
                
-          cd ${{ secrets.SERVER_PATH_BE }}
-          git pull origin main
-          docker-compose -f docker/docker-compose.${{ steps.check_stack.outputs.target_stack }}.yml up -d backend-${{ steps.check_stack.outputs.target_stack }}
-#          echo "${{ steps.check_stack.outputs.target_stack }}" > /home/ubuntu/current-stack.txt
+          docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
+#          cd ${{ secrets.SERVER_PATH_BE }}/${{ steps.check_stack.outputs.target_stack }}-stack
+#          docker-compose up -d backend-${{ steps.check_stack.outputs.target_stack }}
           EOF

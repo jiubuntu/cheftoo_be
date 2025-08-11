@@ -2,9 +2,12 @@ package jwhs.cheftoo.auth.service;
 
 
 import jakarta.transaction.Transactional;
+import jwhs.cheftoo.auth.dto.MemberConsentRequestDto;
 import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.entity.MemberConsent;
 import jwhs.cheftoo.auth.exception.MemberDeleteException;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
+import jwhs.cheftoo.auth.repository.MemberConsentRepository;
 import jwhs.cheftoo.auth.repository.MemberRepository;
 import jwhs.cheftoo.comment.service.CommentService;
 import jwhs.cheftoo.recipe.entity.Recipe;
@@ -26,6 +29,7 @@ public class MemberService {
     private final RecipeService recipeService;
     private final ScrapService scrapService;
     private final CommentService commentService;
+
 
     @Transactional
     public void updateNickname(UUID memberId, String nickname) {
@@ -72,6 +76,8 @@ public class MemberService {
         }
 
     }
+
+
 
 
 }

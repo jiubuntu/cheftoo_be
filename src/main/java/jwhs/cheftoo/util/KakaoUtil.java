@@ -75,7 +75,7 @@ public class KakaoUtil {
                 HttpMethod.GET,
                 kakaoProfileRequest,
                 String.class);
-        log.info("사용자 정보 가져오기 : " + response);
+//        log.info("사용자 정보 가져오기 : " + response);
 
         ObjectMapper objectMapper = new ObjectMapper();
         Kakao.KakaoUserInfo userInfo = null;
@@ -88,4 +88,40 @@ public class KakaoUtil {
 
         return userInfo;
     }
+
+    public void logoutWithAccessToken(String accessToken) {
+        RestTemplate rt = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<MultiValueMap<String, String>> req =
+                new HttpEntity<>(new LinkedMultiValueMap<>(), headers);
+
+        ResponseEntity<String> resp =
+                rt.postForEntity("https://kapi.kakao.com/v1/user/logout", req, String.class);
+
+        if (!resp.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("카카오 logout 실패");
+        }
+    }
+
+    public void unlinkWithAccessToken(String accessToken) {
+        RestTemplate rt = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<MultiValueMap<String, String>> req =
+                new HttpEntity<>(new LinkedMultiValueMap<>(), headers);
+
+        ResponseEntity<String> resp =
+                rt.postForEntity("https://kapi.kakao.com/v1/user/unlink", req, String.class);
+
+        if (!resp.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("카카오 unlink 실패");
+        }
+    }
+
+
 }

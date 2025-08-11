@@ -1,7 +1,7 @@
 # 빌드
 FROM gradle:8.10-jdk21 AS build
 
-WORKDIR /cheftoo-back-prod
+WORKDIR /cheftoo-back
 COPY . .
 RUN ./gradlew clean build -x test
 
@@ -9,8 +9,6 @@ RUN ./gradlew clean build -x test
 FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
-COPY --from=build /cheftoo-back-prod/build/libs/*.jar cheftoo.jar
-
-EXPOSE 8080
+COPY --from=build /cheftoo-back/build/libs/*.jar cheftoo.jar
 
 ENTRYPOINT ["java", "-jar", "cheftoo.jar"]

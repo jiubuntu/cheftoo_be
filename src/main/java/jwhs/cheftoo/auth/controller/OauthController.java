@@ -7,6 +7,7 @@ import jwhs.cheftoo.auth.service.KakaoService;
 import jwhs.cheftoo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,8 @@ public class OauthController {
             HttpServletResponse response
     ) throws IOException {
 
+        Map<String, Object> map = null;
+
         // JSON 파싱
         String prevPage = "/";
         String nextPage = null;
@@ -53,7 +56,13 @@ public class OauthController {
 
         //jwt 발급 및 닉네임 설정을 위한 첫 로그인 여부 파악
         // 처음 로그인하는 사용자라면 -> 닉네임 설정 , 기존 유저라면 -> 그냥 로그인
-        Map<String, Object> map = kakaoService.loginWithKakao(code);
+        try {
+            map = kakaoService.loginWithKakao(code);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
 
         String refreshToken = (String) map.get("refreshToken");
         String accessToken = (String) map.get("accessToken");
@@ -64,7 +73,7 @@ public class OauthController {
 
         // 다음페이지값이 있으면 다음 페이지로 이동
         // 다음페이지 값이 있는 경우 : 레시피 화면(prevPage) -> 레시피 등록 화면(nextPage)
-        String targetUrl = isNewUser ? "nickname" : (nextPage != null ? nextPage : prevPage);
+        String targetUrl = isNewUser ? "/nickname" : (nextPage != null ? nextPage : prevPage);
 //        response.sendRedirect("http://localhost:3000" + targetUrl + "?isNewUser=" + isNewUser);
 
         Map<String, Object> responseBody = new HashMap<>();

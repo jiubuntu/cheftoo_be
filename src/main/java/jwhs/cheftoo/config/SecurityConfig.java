@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("api/auth/nickname").authenticated()
                         .requestMatchers("api/auth/check").authenticated()
                         .requestMatchers("api/auth/logout").authenticated()
+                        .requestMatchers(HttpMethod.POST,"api/auth/member/consent").authenticated()
                         .requestMatchers(HttpMethod.POST,"api/recipe/*/comment").authenticated()
                         .requestMatchers(HttpMethod.DELETE,"api/recipe/comment/*").authenticated()
                         .requestMatchers(HttpMethod.GET,"api/member/comment").authenticated()
