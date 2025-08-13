@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -23,4 +24,21 @@ public class RedisUtilImpl implements RedisUtil {
     public void set(String key, Object value) {
         redisTemplate.opsForValue().set(key, value);
     }
+
+    @Override
+    public void rightPushForList(String key, List<?> list) {
+        redisTemplate.opsForList().rightPushAll(key, list);
+    }
+
+    @Override
+    public long getSizeForList(String key) {
+        return redisTemplate.opsForList().size(key);
+    }
+
+    @Override
+    public List<Object> range(String key, int startIdx, int endIdx) {
+        return redisTemplate.opsForList().range(key, 0, -1);
+    }
+
+
 }

@@ -23,8 +23,8 @@ public class YoutubeController {
 
 
     @GetMapping("/home-videos")
-    public ResponseEntity<YoutubeResponseDto> getHomeVideos() {
-        return ResponseEntity.ok(youtubeService.getCachedVideos());
+    public ResponseEntity<List<String>> getHomeVideos() {
+        return ResponseEntity.ok().body(youtubeService.getCachedVideos());
     }
 
     @GetMapping("/version")

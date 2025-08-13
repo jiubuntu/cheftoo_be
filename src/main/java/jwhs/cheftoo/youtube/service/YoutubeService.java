@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,48 +56,43 @@ public class YoutubeService {
                     .toList();
 
             try {
-                Map<String , Object> data = new HashMap<>();
-                data.put("version", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-                data.put("videoIdList", itemList);
+//                redisUtil.set(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), itemList);
+                redisUtil.rightPushForList(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), itemList);
 
-                String json = objectMapper.writeValueAsString(data);
-                redisUtil.set(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), json);
+                String version = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                redisUtil.set(Youtube.YOUTUBE_VERSION_KEY.getCacheKey(), version);
 
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 log.error("youtube videoId Redis 저장 중 에러가 발생하였습니다.", e.getMessage());
-                throw new RuntimeException("Redis 저장 중 JSON 변환 실패", e);
+                throw new RuntimeException("Redis 저장 중 오류 발생", e);
             }
         }
     }
 
-    // API로 노출
-    public YoutubeResponseDto getCachedVideos() {
 
-        String json = redisUtil.get(Youtube.YOUTUBE_CACHE_KEY.getCacheKey());
-        if (json == null) return null;
-
-        try {
-            YoutubeCacheDataDto cacheData =  objectMapper.readValue(json, YoutubeCacheDataDto.class);
-            return YoutubeResponseDto.builder()
-                    .videoIdList(cacheData.getVideoList())
-                    .build();
-        } catch (JsonProcessingException e) {
-            log.error("yotube Redis 조회 중 JSON 역직렬화 오류");
-            throw new RuntimeException("Youtube Redis 조회 중 JSON 역직렬화 실패", e);
-        }
+    public List<String> getCachedVideos() {
+        String key = Youtube.YOUTUBE_CACHE_KEY.getCacheKey();
+        Long size = redisUtil.getSizeForList(key);
+        if (size == null || size == 0) return Collections.emptyList();
+        List<Object> raw = redisUtil.range(key, 0, -1);
+        return raw.stream().map(Object::toString).toList();
     }
 
+
     public String getYoutubeVideoVersion() {
-        String json = redisUtil.get(Youtube.YOUTUBE_CACHE_KEY.getCacheKey());
-        if (json == null) return null;
+
+        String version = null;
 
         try {
-            YoutubeCacheDataDto cacheData = objectMapper.readValue(json, YoutubeCacheDataDto.class);
-            return cacheData.getVersion();
+            version = redisUtil.get(Youtube.YOUTUBE_VERSION_KEY.getCacheKey());
+            if (version == null) return null;
         } catch (Exception e) {
-            log.error("youtube version 조회 중 json 역직렬화 실패");
-            return null;
+            log.error("유튜브 버전 redis 조회 실패");
         }
+
+        return version;
+
+
     }
 
 
