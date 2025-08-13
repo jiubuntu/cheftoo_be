@@ -31,6 +31,7 @@ public class MemberService {
     private final CommentService commentService;
 
 
+
     @Transactional
     public void updateNickname(UUID memberId, String nickname) {
         Member member = memberRepository.findById(memberId)
@@ -76,6 +77,8 @@ public class MemberService {
         }
 
     }
+
+
 
 
 

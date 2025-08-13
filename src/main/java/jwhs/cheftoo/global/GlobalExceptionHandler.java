@@ -3,6 +3,7 @@ package jwhs.cheftoo.global;
 import io.lettuce.core.RedisException;
 import jwhs.cheftoo.auth.exception.MemberDeleteException;
 import jwhs.cheftoo.auth.exception.MemberNotFoundException;
+import jwhs.cheftoo.auth.exception.SignUpException;
 import jwhs.cheftoo.comment.exception.CommentAccessDeniedException;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
 import jwhs.cheftoo.comment.exception.CommentSaveException;
@@ -148,6 +149,17 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+
+    @ExceptionHandler(SignUpException.class)
+    public ResponseEntity<Map<String, String>> handleSignUpException(SignUpException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "SignUpException");
+        error.put("message", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
 
 
 

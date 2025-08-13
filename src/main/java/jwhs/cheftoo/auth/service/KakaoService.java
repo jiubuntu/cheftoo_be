@@ -1,5 +1,6 @@
 package jwhs.cheftoo.auth.service;
 
+import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.dto.Kakao;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.enums.KakaoInfo;
@@ -44,7 +45,7 @@ public class KakaoService {
 
         boolean isNewUser = optionalMember.isEmpty(); // 처음 가입한 사용자인지
 
-        Member member = optionalMember.orElseGet(() -> registerNewUser(kakaoUserId));
+        Member member = optionalMember.orElseGet(() -> registerNewUserWithKakaoId(kakaoUserId));
         UUID memberId = member.getMemberId();
 
         // redis에 카카오 액세스토큰 저장 (카카오 로그아웃 하기 위함)
@@ -60,9 +61,26 @@ public class KakaoService {
         return resultMap;
     }
 
+    public Member getMemberByKakaoIngaCode(String code) {
+        String accessToken = kakaoUtil.getACcessToken(code);
+        Kakao.KakaoUserInfo kakaoUserInfo = kakaoUtil.getUserInfo(accessToken);
+        String kakaoUserId = String.valueOf(kakaoUserInfo.getId());
+        Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoUserId);
+        Member member = optionalMember.orElse(null);
+        return member;
+    }
+
+    public String getKakaoIdByKakaoIngaCode(String code) {
+        String accessToken = kakaoUtil.getACcessToken(code);
+        Kakao.KakaoUserInfo kakaoUserInfo = kakaoUtil.getUserInfo(accessToken);
+        String kakaoUserId = String.valueOf(kakaoUserInfo.getId());
+        return kakaoUserId;
+    }
+
 
     // 회원가입처리
-    private Member registerNewUser(String kakaoUserId) {
+    @Transactional
+    public Member registerNewUserWithKakaoId(String kakaoUserId) {
         Member newMember = new Member();
         newMember.setKakaoId(kakaoUserId);
         return memberRepository.save(newMember);
