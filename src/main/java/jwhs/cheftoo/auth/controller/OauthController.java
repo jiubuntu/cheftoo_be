@@ -53,10 +53,9 @@ public class OauthController {
                 session.setMaxInactiveInterval(60 * 30); // 30분 뒤 타임아웃
                 session.setAttribute("KAKAO_ID",kakaoId);
             }
-            return ResponseEntity
-                    .status(HttpStatus.FOUND)
-                    .header(HttpHeaders.LOCATION, "/terms")
-                    .build();
+            return ResponseEntity.ok("/terms");
+
+
 
         } else {
             // 리다이렉션 페이지 파싱
