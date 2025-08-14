@@ -18,4 +18,7 @@ public class MemberConsentRequestDto {
 
     @JsonProperty("smsMarketing")
     private boolean smsMarketing;
+
+    @JsonProperty("nickName")
+    private String nickName;
 }

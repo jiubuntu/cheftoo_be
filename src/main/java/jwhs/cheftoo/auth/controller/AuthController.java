@@ -53,30 +53,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message","유효한 토큰"));
     }
 
-    // 닉네임 설정
-    @PutMapping("/nickname")
-    public ResponseEntity<?> setNickName(
-            @RequestParam("nickname") String nickname,
-            HttpServletRequest request
-    ) {
-       String token = jwtUtil.getAccessTokenFromRequest(request);
-       UUID memberId = jwtUtil.getMemberIdFromToken(token);
-
-       memberService.updateNickname(memberId, nickname);
-
-       return ResponseEntity.noContent().build(); // HttpsStatusCode = 204
-
-    }
-
-    // 멤버ID를 통해 닉네임 조회
-    @GetMapping("/nickname")
-    public ResponseEntity<?> getNickNameByMember(HttpServletRequest request) {
-        String token = jwtUtil.getAccessTokenFromRequest(request);
-        UUID memberId = jwtUtil.getMemberIdFromToken(token);
-
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.findNickNameByMemberId(memberId));
-
-    }
 
     @PostMapping("/refresh")
     public void refresh(
@@ -163,19 +139,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // 동의항목 저장
-    @PostMapping("/member/consent")
-    public ResponseEntity<?> saveMemberConsent(
-            HttpServletRequest request,
-            @RequestBody MemberConsentRequestDto dto
-    ) {
-        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
-        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
 
-        memberConsentService.saveMemberConsent(dto, memberId);
-
-        return ResponseEntity.ok().build();
-    }
 
 
 

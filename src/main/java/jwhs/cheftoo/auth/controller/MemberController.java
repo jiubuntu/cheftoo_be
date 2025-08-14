@@ -7,8 +7,10 @@ import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.exception.SignUpException;
 import jwhs.cheftoo.auth.service.KakaoService;
 import jwhs.cheftoo.auth.service.MemberConsentService;
+import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.http.HttpStatusCode;
@@ -18,12 +20,13 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/member")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberConsentService memberConsentService;
     private final KakaoService kakaoService;
+    private final MemberService memberService;
     private final JwtUtil jwtUtil;
 
     // 약관 동의 완료 후 회원가입 처리
@@ -42,7 +45,7 @@ public class MemberController {
 
         try {
             // 회원가입 처리
-            Member newMember = kakaoService.registerNewUserWithKakaoId(kakaoId);
+            Member newMember = kakaoService.registerNewUserWithKakao(dto,kakaoId);
             UUID memberId = newMember.getMemberId();
 
             // 동의항목 저장
@@ -58,9 +61,39 @@ public class MemberController {
         } catch (Exception e) {
             throw new SignUpException("회원가입 중 문제가 발생하였습니다.");
         }
+    }
+
+    // 닉네임 설정
+    @PutMapping("/nickname")
+    public ResponseEntity<?> setNickName(
+            @RequestParam("nickname") String nickname,
+            HttpServletRequest request
+    ) {
+        String token = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        memberService.updateNickname(memberId, nickname);
+
+        return ResponseEntity.noContent().build(); // HttpsStatusCode = 204
+
+    }
+
+    // 멤버ID를 통해 닉네임 조회
+    @GetMapping("/nickname")
+    public ResponseEntity<?> getNickNameByMember(HttpServletRequest request) {
+        String token = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(token);
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.findNickNameByMemberId(memberId));
+
+    }
 
 
-
-
+    @GetMapping("/nickname/check/{nickname}")
+    public ResponseEntity<Boolean> nicknameCheck(
+            @PathVariable("nickname") String nickname
+    ) {
+        boolean exists = memberService.checkNickname(nickname);
+        return ResponseEntity.ok(exists);
     }
 }
