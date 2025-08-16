@@ -26,7 +26,7 @@ public class KakaoUtil {
     private String ACCESS_TOKEN_URL;
 
     // 인가코드로 카카오서버로부터 엑세스 토큰을 받아오는 함수
-    public String getACcessToken(String ingacode) throws RuntimeException {
+    public String getAccessToken(String ingacode) throws RuntimeException {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
@@ -93,7 +93,6 @@ public class KakaoUtil {
         RestTemplate rt = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
-        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         HttpEntity<MultiValueMap<String, String>> req =
                 new HttpEntity<>(new LinkedMultiValueMap<>(), headers);

@@ -83,7 +83,9 @@ public class MemberService {
         return memberRepository.existsByNickname(nickname);
     }
 
-
+    public Member findByKakaoId(String kakaoId) {
+        return memberRepository.findByKakaoId(kakaoId).orElse(null);
+    }
 
 
 

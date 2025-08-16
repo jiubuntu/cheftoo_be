@@ -6,12 +6,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.enums.KakaoInfo;
 import jwhs.cheftoo.auth.service.KakaoService;
+import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.util.JwtUtil;
+import jwhs.cheftoo.util.port.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,8 @@ public class OauthController {
 
     private final KakaoService kakaoService;
     private final JwtUtil jwtUtil;
+    private final MemberService memberService;
+    private final RedisUtil redisUtil;
 
     // 카카오 로그인
 
@@ -40,24 +43,25 @@ public class OauthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        Member member = kakaoService.getMemberByKakaoIngaCode(code);
-        UUID memberId = member.getMemberId();
+        Map<String, String> kakaoUserInfo = kakaoService.getKakaoIdAndAccessTokenByKakaoIngaCode(code);
+        String kakaoId = kakaoUserInfo.get("kakaoUserId");
+        String kakaoAccessToken = kakaoUserInfo.get("kakaoAccessToken");
+        Member member = memberService.findByKakaoId(kakaoId);
 
         if (member == null) {
             // 처음 가입한 사용자인경우 약관동의 세션 생성 및 리다이렉션
-            String kakaoId = kakaoService.getKakaoIdByKakaoIngaCode(code);
-
             HttpSession session = request.getSession(false);
             if (session == null) {
                 session = request.getSession(true);
                 session.setMaxInactiveInterval(60 * 30); // 30분 뒤 타임아웃
                 session.setAttribute("KAKAO_ID",kakaoId);
+                session.setAttribute("KAKAO_ACCESS_TOKEN", kakaoAccessToken);
             }
             return ResponseEntity.ok("/terms");
 
 
-
         } else {
+            UUID memberId = member.getMemberId();
             // 리다이렉션 페이지 파싱
             String prevPage = "/";
             String nextPage = null;
@@ -81,7 +85,10 @@ public class OauthController {
             // 액세스 토큰 발급
             String accessToken = jwtUtil.generateAccessToken(memberId);
             // 리다이레션 페이지 설정
-            String targetUrl = nextPage != null ? nextPage : prevPage ;
+            String targetUrl = nextPage.isEmpty() ? nextPage : prevPage ;
+
+            // 카카오 액세스토큰 갱신
+            redisUtil.set(KakaoInfo.KAKAO_ACCESS_TOKEN_KEY.getAccessTokenKey() + memberId, kakaoAccessToken);
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("accessToken", accessToken);

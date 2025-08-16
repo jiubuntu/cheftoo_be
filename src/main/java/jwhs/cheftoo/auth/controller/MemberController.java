@@ -4,11 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jwhs.cheftoo.auth.dto.MemberConsentRequestDto;
 import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.enums.KakaoInfo;
 import jwhs.cheftoo.auth.exception.SignUpException;
 import jwhs.cheftoo.auth.service.KakaoService;
 import jwhs.cheftoo.auth.service.MemberConsentService;
 import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.util.JwtUtil;
+import jwhs.cheftoo.util.port.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,13 @@ public class MemberController {
     private final KakaoService kakaoService;
     private final MemberService memberService;
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
 
     // 약관 동의 완료 후 회원가입 처리
     @PostMapping("/terms/agree")
     public ResponseEntity<?> agreeTerms(
             @SessionAttribute(name = "KAKAO_ID", required = true) String kakaoId,
+            @SessionAttribute(name = "KAKAO_ACCESS_TOKEN", required = true) String kakaoAccessToken,
             @RequestBody MemberConsentRequestDto dto,
             HttpServletRequest request,
             HttpServletResponse response
@@ -50,6 +54,9 @@ public class MemberController {
 
             // 동의항목 저장
             memberConsentService.saveMemberConsent(dto, memberId);
+
+            // 카카오 액세스토큰 redis 저장
+            redisUtil.set(KakaoInfo.KAKAO_ACCESS_TOKEN_KEY.getAccessTokenKey() + memberId, kakaoAccessToken);
 
             // 리프레시 토큰 발급
             jwtUtil.addRefreshTokenToCookie(memberId, response, jwtUtil.generateRefreshToken(memberId));

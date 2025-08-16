@@ -59,7 +59,7 @@ public class RecipeController {
 
     @GetMapping
     public ResponseEntity<Page<RecipeResponseDto>> getAllRecipe(
-            @PageableDefault(size = 10, sort = "dataCreated", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "dataCreated", direction = Sort.Direction.DESC)
             Pageable pageable,
             @RequestParam(value = "keyword", required = false) String keyword
             )

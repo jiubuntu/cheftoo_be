@@ -35,7 +35,7 @@ public class KakaoService {
     // 카카오 로그인 처리
 
     public Member getMemberByKakaoIngaCode(String code) {
-        String accessToken = kakaoUtil.getACcessToken(code);
+        String accessToken = kakaoUtil.getAccessToken(code);
         Kakao.KakaoUserInfo kakaoUserInfo = kakaoUtil.getUserInfo(accessToken);
         String kakaoUserId = String.valueOf(kakaoUserInfo.getId());
         Optional<Member> optionalMember = memberRepository.findByKakaoId(kakaoUserId);
@@ -43,11 +43,20 @@ public class KakaoService {
         return member;
     }
 
-    public String getKakaoIdByKakaoIngaCode(String code) {
-        String accessToken = kakaoUtil.getACcessToken(code);
+    public Map<String, String> getKakaoIdAndAccessTokenByKakaoIngaCode(String code) {
+        String accessToken = kakaoUtil.getAccessToken(code);
         Kakao.KakaoUserInfo kakaoUserInfo = kakaoUtil.getUserInfo(accessToken);
         String kakaoUserId = String.valueOf(kakaoUserInfo.getId());
-        return kakaoUserId;
+
+        Map<String, String> result = new HashMap<>();
+        result.put("kakaoAccessToken", accessToken);
+        result.put("kakaoUserId", kakaoUserId);
+
+        return result;
+    }
+
+    public String getKakaoAccessTokenFromIngaCode(String code) {
+        return kakaoUtil.getAccessToken(code);
     }
 
 
