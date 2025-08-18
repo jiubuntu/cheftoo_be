@@ -1,12 +1,12 @@
 package jwhs.cheftoo.comment.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
-import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
-import jwhs.cheftoo.comment.dto.CommentResponseDetailDto;
-import jwhs.cheftoo.comment.dto.CommentResponseDto;
+import jwhs.cheftoo.comment.dto.*;
 import jwhs.cheftoo.comment.service.CommentService;
 import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,13 +60,16 @@ public class CommentController {
     }
 
     @GetMapping("/member/comment")
-    public ResponseEntity<List<CommentResponseDetailDto>> getCommentByMember(
-            HttpServletRequest request
+    public ResponseEntity<CommentSliceResponseDto<CommentResponseDetailDto>> getCommentByMember(
+            HttpServletRequest request,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "12") int size
     ) {
         String accessToken = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+        Pageable pageable = PageRequest.of(page, size);
 
-        List<CommentResponseDetailDto> commentList = commentService.findAllCommentByMember(memberId);
+        CommentSliceResponseDto<CommentResponseDetailDto> commentList = commentService.findAllCommentByMember(memberId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(commentList);
     }
 

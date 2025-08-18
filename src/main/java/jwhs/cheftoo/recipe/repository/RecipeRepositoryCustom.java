@@ -17,7 +17,7 @@ public interface RecipeRepositoryCustom {
     List<RecipeResponseDto> findRecipesByViewsOrder(List<UUID> recipeIds);
     List<RecipeResponseDto> findRecipesDateOrder();
 
-    List<RecipeResponseDto> findAllByMember(Member member);
+    Page<RecipeResponseDto> findAllByMemberWithImage(Member member, Pageable pageable);
 
 
 }

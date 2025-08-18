@@ -15,6 +15,9 @@ import jwhs.cheftoo.scrap.entity.QScrap;
 import jwhs.cheftoo.scrap.entity.QScrapInRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.net.URL;
 import java.util.List;
@@ -27,42 +30,52 @@ public class ScrapInRecipeRepositoryImpl implements ScrapInRecipeRepositoryCusto
     private final S3Service s3Service;
 
     @Override
-    public List<RecipeResponseDto> findRecipesInScrap(UUID scrapId) {
+    public Page<RecipeResponseDto> findRecipesInScrap(UUID scrapId, Pageable pageable) {
         QScrapInRecipe scrapInRecipe = QScrapInRecipe.scrapInRecipe;
         QRecipe recipe = QRecipe.recipe;
         QImages images = QImages.images;
 
-        return
-                queryFactory
-                        .select(Projections.constructor(RecipeResponseDto.class,
-                                recipe.recipeId,
-                                recipe.member.memberId,
-                                recipe.recipeTitle,
-                                recipe.recipeContent,
-                                recipe.member.nickname,
-                                images.imgPath,
-                                recipe.dataCreated,
-                                recipe.dataUpdated
-                        ))
-                        .from(scrapInRecipe)
-                        .join(scrapInRecipe.recipe, recipe)
-                        .leftJoin(images).on(images.recipe.eq(recipe))
-                        .where(scrapInRecipe.scrap.scrapId.eq(scrapId))
-                        .fetch()
-                        .stream()
-                        .map(dto -> {
-                            String key = dto.getImgPath();
-                            if (key != null && !key.isBlank()) {
-                                try {
-                                    URL presignedUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
-                                    dto.setImgPath(presignedUrl.toString());
-                                } catch ( Exception e ) {
-                                    log.error("presignedUrl 발급 실패 - key: {}", key, e);
-                                    dto.setImgPath(null);
-                                }
-                            }
-                            return dto;
-                        }).toList();
+
+        List<RecipeResponseDto> content = queryFactory
+                .select(Projections.constructor(RecipeResponseDto.class,
+                        recipe.recipeId,
+                        recipe.member.memberId,
+                        recipe.recipeTitle,
+                        recipe.recipeContent,
+                        recipe.member.nickname,
+                        images.imgPath,
+                        recipe.dataCreated,
+                        recipe.dataUpdated
+                ))
+                .from(scrapInRecipe)
+                .join(scrapInRecipe.recipe, recipe)
+                .leftJoin(images).on(images.recipe.eq(recipe))
+                .where(scrapInRecipe.scrap.scrapId.eq(scrapId))
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch()
+                .stream()
+                .map(dto -> {
+                    String key = dto.getImgPath();
+                    if (key != null && !key.isBlank()) {
+                        try {
+                            URL presignedUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+                            dto.setImgPath(presignedUrl.toString());
+                        } catch ( Exception e ) {
+                            log.error("presignedUrl 발급 실패 - key: {}", key, e);
+                            dto.setImgPath(null);
+                        }
+                    }
+                    return dto;
+                }).toList();
+
+        Long total = queryFactory
+                .select(scrapInRecipe.recipe.count())
+                .from(scrapInRecipe)
+                .where(scrapInRecipe.scrap.scrapId.eq(scrapId))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total);
 
     }
 

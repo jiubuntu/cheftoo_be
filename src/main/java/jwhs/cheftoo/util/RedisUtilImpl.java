@@ -40,5 +40,10 @@ public class RedisUtilImpl implements RedisUtil {
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
+
 
 }

@@ -13,6 +13,9 @@ import jwhs.cheftoo.image.service.S3Service;
 import jwhs.cheftoo.recipe.entity.QRecipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 
 import java.net.URL;
@@ -45,18 +48,19 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                 .from(comment)
                 .join(comment.member, member)
                 .where(comment.recipe.recipeId.eq(recipeId))
+                .orderBy(comment.dataCreated.desc())
                 .fetch();
 
     }
 
     @Override
-    public List<CommentResponseDetailDto> findAllByMember(UUID memberId) {
+    public Slice<CommentResponseDetailDto> findAllByMember(UUID memberId, Pageable pageable) {
         QRecipe recipe = QRecipe.recipe;
         QComment comment = QComment.comment;
         QImages images = QImages.images;
         QMember member = QMember.member;
 
-        return queryFactory
+        List<CommentResponseDetailDto> content =  queryFactory
                 .select(Projections.constructor(CommentResponseDetailDto.class,
                         comment.commentId,
                         recipe.recipeId,
@@ -74,6 +78,9 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                                 .and(member.memberId.eq(memberId))
                                 .and(images.recipe.recipeId.eq(recipe.recipeId))
                 )
+                .orderBy(comment.dataCreated.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1L)
                 .fetch()
                 .stream()
                 .map(dto -> {
@@ -90,6 +97,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom{
                     return dto;
                 })
                 .toList();
+
+        boolean hasNext = content.size() > pageable.getPageSize();
+        if (hasNext) {
+            content = content.subList(0, pageable.getPageSize());
+        }
+
+        return new SliceImpl<>(content, pageable, hasNext);
 
     }
 }

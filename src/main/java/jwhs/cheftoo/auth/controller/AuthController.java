@@ -116,28 +116,7 @@ public class AuthController {
     }
 
 
-    // 회원탈퇴
-    @DeleteMapping("member/me")
-    public ResponseEntity<?> deleteMember(
-            HttpServletRequest request
-    ) {
-        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
-        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
 
-        try {
-            // 카카오에서 토큰 무효화 처리
-            kakaoService.unlinkWithKakao(memberId);
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        memberService.deleteMember(memberId);
-
-
-
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
 
 
 

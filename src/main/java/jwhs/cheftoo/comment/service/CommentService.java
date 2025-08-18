@@ -6,10 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.port.MemberReader;
-import jwhs.cheftoo.comment.dto.CommentRequestSaveDto;
-import jwhs.cheftoo.comment.dto.CommentRequestUpdateDto;
-import jwhs.cheftoo.comment.dto.CommentResponseDetailDto;
-import jwhs.cheftoo.comment.dto.CommentResponseDto;
+import jwhs.cheftoo.comment.dto.*;
 import jwhs.cheftoo.comment.entity.Comment;
 import jwhs.cheftoo.comment.exception.CommentNotFoundException;
 import jwhs.cheftoo.comment.exception.CommentSaveException;
@@ -18,6 +15,8 @@ import jwhs.cheftoo.recipe.entity.Recipe;
 import jwhs.cheftoo.recipe.exception.RecipeNotFoundException;
 import jwhs.cheftoo.recipe.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
@@ -44,10 +43,10 @@ public class CommentService {
 
     }
 
-    public List<CommentResponseDetailDto> findAllCommentByMember(UUID memberId) {
+    public CommentSliceResponseDto findAllCommentByMember(UUID memberId, Pageable pageable) {
 
-        List<CommentResponseDetailDto> commentList = commentRepository.findAllByMember(memberId);
-        return commentList;
+        Slice<CommentResponseDetailDto> commentList = commentRepository.findAllByMember(memberId, pageable);
+        return CommentSliceResponseDto.fromSlice(commentList);
     }
 
     // 댓글 저장

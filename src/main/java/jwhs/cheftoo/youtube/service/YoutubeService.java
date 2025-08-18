@@ -57,6 +57,10 @@ public class YoutubeService {
 
             try {
 //                redisUtil.set(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), itemList);
+                List<Object> existList = redisUtil.range(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), 0, -1);
+                if (!existList.isEmpty()) {
+                    redisUtil.delete(Youtube.YOUTUBE_CACHE_KEY.getCacheKey());
+                }
                 redisUtil.rightPushForList(Youtube.YOUTUBE_CACHE_KEY.getCacheKey(), itemList);
 
                 String version = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

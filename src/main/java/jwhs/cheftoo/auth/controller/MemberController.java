@@ -12,6 +12,7 @@ import jwhs.cheftoo.auth.service.MemberService;
 import jwhs.cheftoo.util.JwtUtil;
 import jwhs.cheftoo.util.port.RedisUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/member")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
 
     private final MemberConsentService memberConsentService;
@@ -102,5 +104,35 @@ public class MemberController {
     ) {
         boolean exists = memberService.checkNickname(nickname);
         return ResponseEntity.ok(exists);
+    }
+
+
+    // 회원탈퇴
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMember(
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+
+        try {
+            // 카카오에서 토큰 무효화 처리
+            kakaoService.unlinkWithKakao(memberId);
+        } catch (RuntimeException e) {
+            log.error(e.getMessage());
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        memberService.deleteMember(memberId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/me")
+    public String getMemberInfo(
+            HttpServletRequest request
+    ) {
+        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = jwtUtil.getMemberIdFromToken(accessToken);
+        return memberId.toString();
     }
 }

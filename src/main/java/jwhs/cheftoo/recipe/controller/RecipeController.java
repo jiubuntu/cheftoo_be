@@ -50,11 +50,14 @@ public class RecipeController {
 
 
     @GetMapping("/member")
-    public ResponseEntity<?> getAllRecipeByMember( HttpServletRequest request) {
+    public ResponseEntity<?> getAllRecipeByMember(
+            HttpServletRequest request,
+            @PageableDefault(size = 12, sort = "dataCreated", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         String token = jwtUtil.getAccessTokenFromRequest(request);
         UUID memberId = jwtUtil.getMemberIdFromToken(token);
 
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipesByMember(memberId)) ;
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findAllRecipesByMember(memberId, pageable)) ;
     }
 
     @GetMapping

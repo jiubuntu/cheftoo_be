@@ -122,17 +122,9 @@ public class RecipeService {
 
 
     // 특정 멤버의 레시피 조회
-    public List<RecipeResponseDto> findAllRecipesByMember(UUID memberId) {
-
+    public Page<RecipeResponseDto> findAllRecipesByMember(UUID memberId, Pageable pageable) {
         Member member = memberReader.getById(memberId);
-        return  recipeRepository.findAllByMember(member).stream()
-                .map(recipe -> {
-                    String key = imageService.findMainImageByRecipe(recipe).getImgPath();
-                    URL RecipeImagePrisignedGetUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
-                    String RecipeImageUrl = RecipeImagePrisignedGetUrl != null ? RecipeImagePrisignedGetUrl.toString() : null;
-                    return RecipeResponseDto.fromEntity(recipe, RecipeImageUrl);
-                })
-                .collect(Collectors.toList());
+        return recipeRepository.findAllByMemberWithImage(member, pageable);
     }
 
 

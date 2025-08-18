@@ -41,7 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/oauth/kakao/callback").permitAll()
                         .requestMatchers("api/mypage").authenticated()
-                        .requestMatchers(HttpMethod.DELETE,"api/auth/member/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE,"api/member/me").authenticated()
+                        .requestMatchers(HttpMethod.GET,"api/member/me").authenticated()
                         .requestMatchers("api/auth/nickname").authenticated()
                         .requestMatchers("api/auth/check").authenticated()
                         .requestMatchers("api/auth/logout").authenticated()

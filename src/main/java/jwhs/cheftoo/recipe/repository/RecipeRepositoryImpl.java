@@ -6,6 +6,8 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
+import jwhs.cheftoo.auth.entity.Member;
+import jwhs.cheftoo.auth.entity.QMember;
 import jwhs.cheftoo.cookingorder.entity.QCookingOrder;
 import jwhs.cheftoo.image.entity.QImages;
 import jwhs.cheftoo.image.enums.S3ImageType;
@@ -173,6 +175,58 @@ public class RecipeRepositoryImpl implements RecipeRepositoryCustom{
                     }
                     return dto;
                 }).toList();
+    }
+
+    @Override
+    public Page<RecipeResponseDto> findAllByMemberWithImage(Member member, Pageable pageable) {
+        QRecipe recipe = QRecipe.recipe;
+        QImages images = QImages.images;
+
+        List<RecipeResponseDto> content = queryFactory
+                .select(Projections.constructor(RecipeResponseDto.class,
+                recipe.recipeId,
+                recipe.member.memberId,
+                recipe.recipeTitle,
+                recipe.recipeContent,
+                recipe.member.nickname,
+                images.imgPath,
+                recipe.dataCreated,
+                recipe.dataUpdated
+        ))
+                .from(recipe)
+                .where(recipe.member.eq(member))
+                .leftJoin(images).on(images.recipe.eq(recipe))
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .orderBy(recipe.dataCreated.desc())
+                .fetch()
+                .stream()
+                .map(dto -> {
+                    String key = dto.getImgPath();
+                    if (key != null && !key.isBlank()) {
+                        try {
+                            URL presignedUrl = s3Service.generateRecipeImagePresignedGetUrl(key, S3ImageType.RECIPE_GET_DURATION);
+                            dto.setImgPath(presignedUrl.toString());
+                        } catch ( Exception e ) {
+                            log.error("presignedUrl 발급 실패 - key: {}", key, e);
+                            dto.setImgPath(null);
+                        }
+                    }
+                    return dto;
+                })
+                .toList();
+
+        Long total = queryFactory
+                .select(recipe.count())
+                .from(recipe)
+                .where(recipe.member.eq(member))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total);
+
+
+
+
     }
 
 

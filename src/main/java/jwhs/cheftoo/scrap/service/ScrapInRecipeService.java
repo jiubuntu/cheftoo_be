@@ -13,6 +13,8 @@ import jwhs.cheftoo.scrap.entity.ScrapInRecipe;
 import jwhs.cheftoo.scrap.exception.ScrapNotFoundException;
 import jwhs.cheftoo.scrap.repository.ScrapInRecipeRepository;
 import jwhs.cheftoo.scrap.repository.ScrapRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,8 +55,8 @@ public class ScrapInRecipeService {
     }
 
     // 특정 스크랩폴더의 모든 레시피 리스트를 가져오는 함수
-    public ScrapInRecipeResponseDto findRecipeListByScrapId(UUID scrapId) {
-        List<RecipeResponseDto> recipeList =  scrapInRecipeRepository.findRecipesInScrap(scrapId);
+    public ScrapInRecipeResponseDto findRecipeListByScrapId(UUID scrapId, Pageable pageable) {
+        Page<RecipeResponseDto> recipeList =  scrapInRecipeRepository.findRecipesInScrap(scrapId, pageable);
 
         return ScrapInRecipeResponseDto.builder()
                 .scrapId(scrapId)

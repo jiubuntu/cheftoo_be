@@ -5,6 +5,9 @@ import jwhs.cheftoo.scrap.dto.ScrapInRecipeDeleteRequestDto;
 import jwhs.cheftoo.scrap.dto.ScrapInRecipeResponseDto;
 import jwhs.cheftoo.scrap.service.ScrapInRecipeService;
 import jwhs.cheftoo.util.JwtUtil;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,9 +40,10 @@ public class ScrapInRecipeController {
 
     @GetMapping("member/scrap/{scrapId}/recipe")
     public ResponseEntity<ScrapInRecipeResponseDto> getAllRecipeByScrapId(
-            @PathVariable("scrapId") UUID scrapId
+            @PathVariable("scrapId") UUID scrapId,
+            @PageableDefault(size = 12, sort = "dataCreated", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        ScrapInRecipeResponseDto resultDto = scrapInRecipeService.findRecipeListByScrapId(scrapId);
+        ScrapInRecipeResponseDto resultDto = scrapInRecipeService.findRecipeListByScrapId(scrapId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(resultDto);
     }
 

@@ -13,4 +13,6 @@ public interface RedisUtil {
     public long getSizeForList(String key);
 
     public List<Object> range(String key, int startIdx, int endIdx);
+
+    public void delete(String key);
 }
