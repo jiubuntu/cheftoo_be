@@ -25,7 +25,6 @@ jobs:
 
       - name: Build and Push Backend Image
         run: |
-          echo "TAG = ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:dev"
           docker build -t ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:dev .
           docker push ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:dev
 
