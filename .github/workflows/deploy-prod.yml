@@ -27,9 +27,9 @@ jobs:
         run: |
           STACK=$(ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cat /home/ubuntu/current-stack.txt")
           if [ "$STACK" == "blue" ]; then
-            echo "target_stack=green" >> $GITHUB_OUTPUT
+            echo "target_stack=green" >> "$GITHUB_OUTPUT"
           else
-            echo "target_stack=blue" >> $GITHUB_OUTPUT
+            echo "target_stack=blue" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set TARGET_STACK
