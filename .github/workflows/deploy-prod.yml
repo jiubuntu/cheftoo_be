@@ -47,7 +47,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
           docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
-               
           export KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}"
           export KAKAO_CLIENT_SECRET="${{ secrets.KAKAO_CLIENT_SECRET }}"
           export KAKAO_REDIRECT_URL="${{ secrets.KAKAO_REDIRECT_URL }}"
@@ -70,9 +69,5 @@ jobs:
           export POLICY_VERSION_PRIVACY="${{ secrets.POLICY_VERSION_PRIVACY }}"
           export POLICY_VERSION_TOS="${{ secrets.POLICY_VERSION_TOS }}"
           export POLICY_VERSION_SMS="${{ secrets.POLICY_VERSION_SMS }}"
-           
-               
           docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
-#          cd ${{ secrets.SERVER_PATH_BE }}/${{ steps.check_stack.outputs.target_stack }}-stack
-#          docker-compose up -d backend-${{ steps.check_stack.outputs.target_stack }}
           EOF
