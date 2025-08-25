@@ -72,7 +72,7 @@ public class ScrapInRecipeService {
         scrapInRecipeRepository.deleteByScrapIdAndRecipeId(scrapId, recipeIdList);
     }
 
-    public ScrapInRecipeCheckAndCounDetailtDto checkBookMarkByRecipeAndMember(UUID recipeId, UUID memberId) {
+    public ScrapInRecipeCheckAndCounDetailtDto checkScrapMarkByRecipeAndMember(UUID recipeId, UUID memberId) {
         return scrapInRecipeRepository.checkScrapAndCount(recipeId, memberId);
     }
 

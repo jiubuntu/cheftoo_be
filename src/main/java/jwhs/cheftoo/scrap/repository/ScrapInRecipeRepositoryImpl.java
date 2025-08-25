@@ -81,35 +81,34 @@ public class ScrapInRecipeRepositoryImpl implements ScrapInRecipeRepositoryCusto
 
     @Override
     public ScrapInRecipeCheckAndCounDetailtDto checkScrapAndCount(UUID recipeId, UUID memberId) {
-
         QScrapInRecipe scrapInRecipe = QScrapInRecipe.scrapInRecipe;
         QScrap scrap = QScrap.scrap;
-        boolean checkScrap = false;
 
+        // 1) member가 스크랩한 scrapId (없으면 null)
+        UUID scrapId = null;
         if (memberId != null) {
-            checkScrap = queryFactory
-                    .selectFrom(scrapInRecipe)
+            scrapId = queryFactory
+                    .select(scrap.scrapId)
+                    .from(scrapInRecipe)
                     .join(scrapInRecipe.scrap, scrap)
                     .where(
                             scrapInRecipe.recipe.recipeId.eq(recipeId),
                             scrap.member.memberId.eq(memberId)
                     )
-                    .fetchFirst() != null;
+                    .fetchFirst(); // 유니크 제약이 있으면 한 건만 나옴
         }
 
-        long ScrapCount = queryFactory
-                .select(
-                        scrapInRecipe.count()
-                )
+        // 2) 전체 스크랩 수
+        Long scrapCount = queryFactory
+                .select(scrapInRecipe.count())
                 .from(scrapInRecipe)
-                .where(
-                        scrapInRecipe.recipe.recipeId.eq(recipeId)
-                )
+                .where(scrapInRecipe.recipe.recipeId.eq(recipeId))
                 .fetchOne();
 
         return ScrapInRecipeCheckAndCounDetailtDto.builder()
-                .scrap(checkScrap)
-                .scrapCount(ScrapCount)
+                .scrap(scrapId != null)                 // 스크랩 여부
+                .scrapId(scrapId)                       // 스크랩한 경우 해당 ID
+                .scrapCount(scrapCount == null ? 0 : scrapCount)
                 .build();
     }
 }

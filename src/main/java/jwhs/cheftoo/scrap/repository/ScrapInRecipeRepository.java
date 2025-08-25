@@ -5,6 +5,7 @@ import jwhs.cheftoo.scrap.entity.ScrapInRecipe;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,5 +15,5 @@ public interface ScrapInRecipeRepository extends JpaRepository<ScrapInRecipe, UU
 
     @Modifying
     @Query("DELETE FROM ScrapInRecipe s WHERE s.scrap.scrapId = :scrapId AND s.recipe.recipeId IN :recipeIdList")
-    void deleteByScrapIdAndRecipeId(UUID scrapId, List<UUID> recipeIdList);
+    void deleteByScrapIdAndRecipeId(@Param("scrapId") UUID scrapId, @Param("recipeIdList") List<UUID> recipeIdList);
 }

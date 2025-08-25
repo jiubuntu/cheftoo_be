@@ -23,7 +23,6 @@ import jwhs.cheftoo.recipe.repository.RecipeRepository;
 import jwhs.cheftoo.sauce.entity.Sauce;
 import jwhs.cheftoo.sauce.service.SauceService;
 import jwhs.cheftoo.scrap.dto.ScrapInRecipeCheckAndCounDetailtDto;
-import jwhs.cheftoo.scrap.entity.ScrapInRecipe;
 import jwhs.cheftoo.scrap.service.ScrapInRecipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +99,7 @@ public class RecipeService {
         List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderList);
 
         // 스크랩개수, 스크랩 수
-        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkBookMarkByRecipeAndMember(recipe.getRecipeId(), recipe.getMember().getMemberId());
+        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkScrapMarkByRecipeAndMember(recipe.getRecipeId(), recipe.getMember().getMemberId());
 
         // 조회수 증가
         recipeViewService.incrementRecipeView(recipeId);
@@ -115,6 +114,7 @@ public class RecipeService {
                 .sauce(sauce)
                 .cookingOrder(cookingOrder)
                 .scrap(checkScrapAndScrapCount.isScrap())
+                .scrapId(checkScrapAndScrapCount.getScrapId())
                 .scrapCount(checkScrapAndScrapCount.getScrapCount())
                 .build();
 

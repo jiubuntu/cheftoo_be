@@ -21,6 +21,7 @@ public class RecipeDetailResponseDto {
     private List<Sauce> sauce;
     private List<CookingOrder> cookingOrder;
     private boolean scrap;
+    private UUID scrapId;
     private long scrapCount;
 
     @Getter
