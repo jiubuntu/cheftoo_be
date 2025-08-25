@@ -58,9 +58,5 @@ jobs:
             export POLICY_VERSION_PRIVACY="${{ secrets.POLICY_VERSION_PRIVACY }}"
             export POLICY_VERSION_TOS="${{ secrets.POLICY_VERSION_TOS }}"
             export POLICY_VERSION_SMS="${{ secrets.POLICY_VERSION_SMS }}"
-            
             docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:dev
-#            cd ${{ secrets.SERVER_PATH_BE_DEV }}
-#            docker-compose up -d
-            
             echo "Development deployment complete."
