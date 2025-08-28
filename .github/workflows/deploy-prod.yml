@@ -19,7 +19,7 @@ jobs:
 
       - name: Decode EC2 SSH Key
         run: |
-          echo "${{ secrets.SERVER_SSH_KEY }}" | base64 -d > key.pem
+          echo "${{ secrets.SERVER_SSH_KEY }}" > key.pem
           chmod 600 key.pem
 
       - name: Determine Active Stack
