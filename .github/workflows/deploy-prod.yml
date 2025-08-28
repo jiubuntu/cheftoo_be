@@ -74,4 +74,4 @@ jobs:
             export POLICY_VERSION_TOS="${{ secrets.POLICY_VERSION_TOS }}"
             export POLICY_VERSION_SMS="${{ secrets.POLICY_VERSION_SMS }}"
             docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
-            EOF
+            
