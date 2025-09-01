@@ -10,5 +10,6 @@ FROM eclipse-temurin:21-jdk-alpine
 
 WORKDIR /app
 COPY --from=build /cheftoo-back/build/libs/*.jar cheftoo.jar
+COPY src/main/resources/application.properties ./
 
 ENTRYPOINT ["java", "-jar", "cheftoo.jar"]
