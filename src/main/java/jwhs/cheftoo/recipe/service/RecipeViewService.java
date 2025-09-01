@@ -60,6 +60,7 @@ public class RecipeViewService {
             return recipeRepository.findRecipesByViewsOrder(recipeIdList);
         } catch (RedisConnectionFailureException e) {
             log.error("[RecipeViewService - getAllRecipeByViewsOrder] redis 연결 실패");
+            e.printStackTrace();
             // fallback -> 최신순으로 조회
             return recipeRepository.findRecipesDateOrder();
         } catch ( Exception e) {
