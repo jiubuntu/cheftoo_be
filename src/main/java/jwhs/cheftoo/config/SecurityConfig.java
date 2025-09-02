@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/oauth/kakao/callback").permitAll()
+                        .requestMatchers("api/member/terms/agree").permitAll()
                         .requestMatchers("api/mypage").authenticated()
                         .requestMatchers(HttpMethod.DELETE,"api/member/me").authenticated()
                         .requestMatchers(HttpMethod.GET,"api/member/me").authenticated()
