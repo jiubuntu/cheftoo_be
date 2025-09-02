@@ -19,4 +19,5 @@ ENV SPRING_REDIS_PORT=$SPRING_REDIS_PORT
 COPY --from=build /cheftoo-back/build/libs/*.jar cheftoo.jar
 COPY src/main/resources/application.properties ./application.properties
 
-ENTRYPOINT ["java", "-Dspring.config.location=./application.properties", "-jar", "cheftoo.jar"]
+ENTRYPOINT ["java", "-Dspring.config.location=file:./application.properties", "-jar", "cheftoo.jar"]
+
