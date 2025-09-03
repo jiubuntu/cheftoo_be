@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/oauth/kakao/callback").permitAll()
+                        .requestMatchers("api/member/terms/agree").permitAll()
                         .requestMatchers("api/mypage").authenticated()
                         .requestMatchers(HttpMethod.DELETE,"api/member/me").authenticated()
                         .requestMatchers(HttpMethod.GET,"api/member/me").authenticated()
@@ -69,7 +70,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000")); //react 서버 허용
+        config.setAllowedOrigins(List.of("http://3.37.143.36:9000", "https://cheftoo.co.kr"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); //
         config.setAllowedHeaders(List.of("*")); //
 

@@ -2,6 +2,7 @@ package jwhs.cheftoo.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.dto.MemberConsentRequestDto;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.enums.KakaoInfo;
@@ -36,6 +37,7 @@ public class MemberController {
 
     // 약관 동의 완료 후 회원가입 처리
     @PostMapping("/terms/agree")
+    @Transactional
     public ResponseEntity<?> agreeTerms(
             @SessionAttribute(name = "KAKAO_ID", required = true) String kakaoId,
             @SessionAttribute(name = "KAKAO_ACCESS_TOKEN", required = true) String kakaoAccessToken,

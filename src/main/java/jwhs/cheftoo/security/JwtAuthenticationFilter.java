@@ -44,8 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
-        // 로그인 회원가입 요청 , 리프레시 토큰 재발급은 JWT 검증 X
-        if (requestURI.equals("/api/oauth/kakao/callback") || requestURI.equals("/api/auth/refresh")) {
+        // 로그인 회원가입 요청 , 리프레시 토큰 재발급, 필수항목 동의는 JWT 검증 X
+        if (requestURI.equals("/api/oauth/kakao/callback") || requestURI.equals("/api/auth/refresh") || requestURI.equals("/api/member/terms/agree")) {
             filterChain.doFilter(request, response);
             return ;
         }
