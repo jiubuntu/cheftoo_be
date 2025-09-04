@@ -1,5 +1,6 @@
 package jwhs.cheftoo.recipe.service;
 
+import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import jwhs.cheftoo.auth.entity.Member;
 import jwhs.cheftoo.auth.port.MemberReader;
@@ -59,7 +60,7 @@ public class RecipeService {
     private final ScrapInRecipeService scrapInRecipeService;
 
     // 단건조회(상세조회)
-    public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId) {
+    public RecipeDetailResponseDto findRecipeByRecipeId(UUID recipeId, @Nullable UUID memberId) {
 
         // 레시피 조회
         Recipe recipe = recipeRepository.findByRecipeId(recipeId)
@@ -99,7 +100,7 @@ public class RecipeService {
         List<RecipeDetailResponseDto.CookingOrder> cookingOrder = RecipeDetailResponseDto.CookingOrder.fromEntity(cookingOrderList);
 
         // 스크랩개수, 스크랩 수
-        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkScrapMarkByRecipeAndMember(recipe.getRecipeId(), recipe.getMember().getMemberId());
+        ScrapInRecipeCheckAndCounDetailtDto checkScrapAndScrapCount = scrapInRecipeService.checkScrapMarkByRecipeAndMember(recipe.getRecipeId(), memberId);
 
         // 조회수 증가
         recipeViewService.incrementRecipeView(recipeId);

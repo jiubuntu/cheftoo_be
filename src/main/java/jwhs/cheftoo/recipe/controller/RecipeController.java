@@ -7,6 +7,7 @@ import jwhs.cheftoo.recipe.dto.RecipeResponseDto;
 import jwhs.cheftoo.recipe.service.RecipeService;
 import jwhs.cheftoo.recipe.service.RecipeViewService;
 import jwhs.cheftoo.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 //레시피
 @RestController
+@Slf4j
 @RequestMapping("/api/recipe")
 public class RecipeController {
 
@@ -43,9 +45,21 @@ public class RecipeController {
 
     @GetMapping("/{recipeId}")
     public ResponseEntity<?> getRecipe(
-            @PathVariable("recipeId") UUID recipeId
+            @PathVariable("recipeId") UUID recipeId,
+            HttpServletRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId));
+        String token = jwtUtil.getAccessTokenFromRequest(request);
+        UUID memberId = null;
+
+        if (token != null) {
+            try {
+                memberId = jwtUtil.getMemberIdFromToken(token);
+            } catch (Exception e) {
+                log.warn("RecipeController >> getRecipe : 잘못된 토큰이거나 파싱 실패", token, e);
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.findRecipeByRecipeId(recipeId, memberId));
     }
 
 

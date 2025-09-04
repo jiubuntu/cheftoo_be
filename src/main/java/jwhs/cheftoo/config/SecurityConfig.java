@@ -70,7 +70,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://3.37.143.36:9000", "https://cheftoo.co.kr"));
+        config.setAllowedOrigins(List.of("http://3.37.143.36:9000", "https://cheftoo.co.kr", "http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); //
         config.setAllowedHeaders(List.of("*")); //
 
