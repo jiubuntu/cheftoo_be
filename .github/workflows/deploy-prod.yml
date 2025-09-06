@@ -51,4 +51,3 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             docker compose pull backend-${{ steps.check_stack.outputs.target_stack }}
-            EOF
