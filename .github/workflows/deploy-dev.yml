@@ -36,5 +36,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "Deploying dev branch to development environment..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:dev
+            docker compose pull backend-dev
             echo "Development deployment complete."

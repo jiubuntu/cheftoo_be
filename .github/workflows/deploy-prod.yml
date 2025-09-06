@@ -50,5 +50,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/cheftoo-backend:${{ steps.check_stack.outputs.target_stack }}
-            
+            docker compose pull backend-${{ steps.check_stack.outputs.target_stack }}
+            EOF
