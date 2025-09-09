@@ -37,7 +37,7 @@
 
 
 ### Frontend
-`React`, `Axios`, `Nginx 정적 파일 호스팅`
+`React`, `Axios`, `React Router`, `Tailwind CSS`, `Bootstrap`
 
 
 ## 🍎 기능 소개
